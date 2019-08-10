@@ -76,13 +76,13 @@ class Player {
 		this.hitTop = false;
 		this.hitBottom = false;
 
-		this.maxMoveSpeed = 5;
+		this.maxMoveSpeed = 10;
 		this.groundFriction = 0.3;
 		this.airFriction = 0.05;
 
-		this.gravitySpeed = 0.5;
-		this.maxGravity = 10;
-		this.jumpStrength = 10;
+		this.gravitySpeed = 1;
+		this.maxGravity = 15;
+		this.jumpStrength = 20;
 
 		this.velX = 0;
 		this.velY = 0;
@@ -180,7 +180,7 @@ class Player {
 		this.inputUpLastFrame = this.playerInput.up;
 
 		// Apply gravity
-		this.velY += this.gravitySpeed
+		this.velY += this.gravitySpeed;
 		if(this.velY > this.maxGravity)
 			this.velY = this.maxGravity;
 
