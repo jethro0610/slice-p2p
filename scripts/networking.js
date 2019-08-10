@@ -15,6 +15,9 @@ var canTick = false;
 var debugStopSending = false;
 
 let tickEvent = new $.Event('tick');
+let startEvent = new $.Event('start');
+
+var isHost = false;
 
 function Inputs() {
 	this.up = false
@@ -74,6 +77,7 @@ function setLocalClient(newClient){
 	localClient.on('connection', function(conn){
 		console.log('Got a connection');
 		setConnection(conn);
+		isHost = true;
 	});
 
 	localClient.on('error', function(err){
@@ -86,8 +90,7 @@ function setConnection(newConnection){
 	connection = newConnection;
 
 	connection.on('open', function() {
-		sendInput();
-		gameTick();
+		start();
 	});
 
 	connection.on('error', function(err){
@@ -140,6 +143,12 @@ function onRecieveInput(recievedInput){
 	remoteInputBuffer.push(recievedInput)
 	numberOfRecievedInputs += 1;
 	//console.log("Inputs sent: " + numberOfSentInputs.toString() + " | Inputs recieved: " + numberOfRecievedInputs.toString());
+}
+
+function start(){
+	sendInput();
+	gameTick();
+	$(document).trigger(startEvent);
 }
 
 function gameTick(){
