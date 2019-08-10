@@ -71,21 +71,41 @@ class Player {
 		this.y = y;
 		this.rectangle = new Rectangle(32, 32, this.x, this.y);
 
+		this.maxMoveSpeed = 5;
+		this.groundFriction = 0.3;
+		this.airFriction = 0.05;
+
 		this.velX = 0;
 		this.velY = 0;
 
 		this.playerInput = new Inputs();
 	}
 
+	setFriction(newFriction){
+		this.friction = newFriction;
+	}
+
+	groundAcc(){
+		return (this.maxMoveSpeed * this.groundFriction) / (-this.groundFriction + 1.0);
+	}
+
+	airAcc(){
+		return (this.maxMoveSpeed * this.airFriction) / (-this.airFriction + 1.0);
+	}
+
 	tick() {
-		if(this.playerInput.up)
-			this.y -= 1;
-		if(this.playerInput.down)
-			this.y += 1;
+		// Apply friction
+		this.velX -= this.velX * 0.2;
+
+		// Move from input
 		if(this.playerInput.left)
-			this.x -= 1;
+			this.velX -= this.groundAcc();
 		if(this.playerInput.right)
-			this.x += 1;
+			this.velX += this.groundAcc();
+
+		this.x += this.velX;
+		this.y += this.velY;
+
 		// Update rectangle position
 		this.rectangle.x = this.x;
 		this.rectangle.y = this.y

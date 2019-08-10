@@ -9,10 +9,8 @@ var remoteInputBuffer = [];
 var numberOfSentInputs = 0;
 var numberOfRecievedInputs = 0;
 
-var bufferSize = 6;
+var bufferSize = 2;
 var canTick = false;
-
-var debugStopSending = false;
 
 let tickEvent = new $.Event('tick');
 let startEvent = new $.Event('start');
@@ -138,7 +136,7 @@ function onRecieveMessage(peerMessageJSON) {
 }
 
 function sendInput(){
-	if(numberOfSentInputs <= numberOfRecievedInputs && debugStopSending == false){
+	if(numberOfSentInputs <= numberOfRecievedInputs){
 		// Have to make a copy, otherwise whole array will be of a single reference
 		var inputToSend = new Inputs();
 		inputToSend.copyFromAnotherInput(currentInput);
@@ -167,7 +165,7 @@ function gameTick(){
 		canTick = true;
 	}
 
-	if(canTick == true){
+	if(canTick){
 		//console.log("Ticking with buffer length: " + remoteInputBuffer.length.toString());
 		var localInputThisTick = localInputBuffer.shift();
 		var remoteInputThisTick = remoteInputBuffer.shift();
