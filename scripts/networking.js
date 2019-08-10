@@ -1,7 +1,7 @@
 var localClient;
 var connection;
 
-var currentInputs;
+var currentInputs = new Inputs();
 
 function Inputs() {
 	this.up = false
@@ -73,7 +73,7 @@ function setConnection(newConnection){
 	connection = newConnection;
 
 	connection.on('open', function() {
-			sendMessage(new PeerMessage('testMessage', ''));
+		sendInput();
 	});
 
 	connection.on('error', function(err){
@@ -81,7 +81,7 @@ function setConnection(newConnection){
 	});
 
 	connection.on('data', function(data){
-		recieveMessage(data);
+		onRecieveMessage(data);
 	});
 }
 
@@ -89,7 +89,7 @@ function sendMessage(peerMessage){
 	connection.send(JSON.stringify(peerMessage));
 }
 
-function recieveMessage(peerMessageJSON) {
+function onRecieveMessage(peerMessageJSON) {
 	var peerMessage;
 	// Only continute if the message is a string
 	if(typeof peerMessageJSON != 'string'){
@@ -107,4 +107,29 @@ function recieveMessage(peerMessageJSON) {
 		console.log('Recieved data is not a valid PeerMessage');
 		return false;
 	}
+
+	if(peerMessage.messageName == 'input'){
+		onRecieveInput(peerMessage.messageData);
+	}
+
+	if(peerMessage.messageName == 'inputConfirm'){
+		onRecieveInputConfirm();
+	}
+}
+
+function sendInput(){
+	sendMessage(new PeerMessage('input', currentInputs));
+}
+
+function onRecieveInput(recievedInputs){
+	console.log('Recieved inputs');
+	sendInputConfirm();
+}
+
+function sendInputConfirm(){
+	sendMessage(new PeerMessage('inputConfirm'), '');
+}
+
+function onRecieveInputConfirm(){
+	sendInput();
 }
