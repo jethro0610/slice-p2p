@@ -1,14 +1,19 @@
+var gameWorld;
+var player1;
+var player2;
+var gameCanvas;
+
 $(document).ready(function() {
 	$(document).on('start', startGame);
 	$(document).on('tick', tick);
 });
 
 function startGame(){
-	var gameWorld = new GameWorld(500, 500);
-	var player1 = gameWorld.addPlayer(0, 0);
-	var player2 = gameWorld.addPlayer(0, 300);
+	gameWorld = new GameWorld(500, 500);
+	player1 = gameWorld.addPlayer(0, 0);
+	player2 = gameWorld.addPlayer(300, 0);
 
-	var gameCanvas = {
+	gameCanvas = {
 		canvas : document.createElement('canvas'),
 		init : function() {
 			this.canvas.width = gameWorld.width;
@@ -38,5 +43,17 @@ function tick(e){
 }
 
 function draw(){
+	gameCanvas.clear();
 
+	context = gameCanvas.context;
+	// Draw all rectangles
+	for(var i = 0; i < gameWorld.rectangles.length; i++){
+	  	context.fillStyle = 'black';
+	  	context.fillRect(gameWorld.rectangles[i].x, gameWorld.rectangles[i].y, gameWorld.rectangles[i].width, gameWorld.rectangles[i].height);
+	}
+	// Draw all players
+	for(var i = 0; i < gameWorld.players.length; i++){
+	 	context.fillStyle = 'red';
+	  	context.fillRect(gameWorld.players[i].rectangle.x, gameWorld.players[i].rectangle.y, gameWorld.players[i].rectangle.width, gameWorld.players[i].rectangle.height);
+	}
 }
