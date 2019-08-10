@@ -1,5 +1,5 @@
-var thisClient;
-var connectedClient;
+var localClient;
+var remoteClient;
 
 class PeerMessage {
 	constructor(messageName, messageData){
@@ -9,38 +9,50 @@ class PeerMessage {
 }
 
 $(document).ready(function() {
-	setThisClient(new Peer());
+	setLocalClient(new Peer());
 
 	$('#joinButton').click(function (){
-		if(typeof connectedClient == 'undefined' && typeof thisClient != undefined){
-			setConnectedClient(thisClient.connect($('#joinInput').val()));
+		if(typeof remoteClient == 'undefined' && typeof localClient != undefined){
+			setRemoteClient(localClient.connect($('#joinInput').val()));
+			console.log('Connected to client');
 			networkTick();
 		}
 	});
 });
 
-// Put this client's bindings here
-function setThisClient(newClient){
-	thisClient = newClient;
-	thisClient.on('open', function(id) {
-		$('#hostCode').text(thisClient.id);
+// Put local client bindings here
+function setLocalClient(newClient){
+	localClient = newClient;
+	localClient.on('open', function(id) {
+		$('#hostCode').text(localClient.id);
 	});
 
-	thisClient.on('connection', function(conn){
-		console.log('got a connection');
-		connectedClient = conn;
+	localClient.on('connection', function(conn){
+		console.log('Got a connection');
+		remoteClient = conn;
 		networkTick();
 	});
+
+	localClient.on('error', function(err){
+		console.log("Local client error: " + err.type);
+	});
 }
 
-// Put the connected client's bindings here
-function setConnectedClient(newClient){
-	connectedClient = newClient;
+// Put remote client bindings here
+function setRemoteClient(newClient){
+	remoteClient = newClient;
+	remoteClient.on('error', function(err){
+		console.log("Remote client error: " + err.type);
+	});
 }
 
+var currentTick = 0;
 function networkTick(){
-	// Tick only if the client is set and is connected to another client
-	if(typeof thisClient != 'undefined' && typeof connectedClient != 'undefined'){
-		this.setTimeout(tick, 1000);
+	currentTick += 1;
+	console.log(currentTick);
+
+	// Tick again only if the client is set and is connected to another client
+	if(typeof localClient != 'undefined' && typeof remoteClient != 'undefined'){
+		this.setTimeout(networkTick, 1000);
 	}
 }
