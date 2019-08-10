@@ -10,6 +10,8 @@ var numberOfSentInputs = 0;
 var numberOfRecievedInputs = 0;
 
 var bufferSize = 6;
+var canTick = false;
+
 var debugStopSending = false;
 
 function Inputs() {
@@ -83,6 +85,7 @@ function setConnection(newConnection){
 
 	connection.on('open', function() {
 		sendInput();
+		gameTick();
 	});
 
 	connection.on('error', function(err){
@@ -125,18 +128,31 @@ function onRecieveMessage(peerMessageJSON) {
 function sendInput(){
 	if(numberOfSentInputs <= numberOfRecievedInputs && debugStopSending == false){
 		sendMessage(new PeerMessage('input', currentInput));
+		localInputBuffer.push(currentInput);
 		numberOfSentInputs += 1;
 	}
-	setTimeout(sendInput, 1000);
+	setTimeout(sendInput, 1000/60);
 }
 
-function onRecieveInput(recievedInputs){
+function onRecieveInput(recievedInput){
+	remoteInputBuffer.push(recievedInput)
 	numberOfRecievedInputs += 1;
-
 	console.log("Inputs sent: " + numberOfSentInputs.toString() + " | Inputs recieved: " + numberOfRecievedInputs.toString());
 }
 
 function gameTick(){
+	if(remoteInputBuffer.length >= bufferSize && localInputBuffer.length >= bufferSize){
+		canTick = true;
+	}
 
-	setTimeout
+	if(canTick == true){
+		console.log("Ticking with buffer length: " + remoteInputBuffer.length.toString());
+		var localInputThisTick = localInputBuffer.shift();
+		var remoteInputThisTick = remoteInputBuffer.shift();
+
+		if(remoteInputBuffer.length == 0 || localInputBuffer.length == 0){
+			canTick = false;
+		}
+	}
+	setTimeout(gameTick, 1000/60);
 }
