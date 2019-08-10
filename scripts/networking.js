@@ -24,6 +24,13 @@ function Inputs() {
 	this.down = false;
 	this.left = false;
 	this.right = false;
+
+	this.copyFromAnotherInput = function(inputToCopy){
+		this.up = inputToCopy.up;
+		this.down = inputToCopy.down;
+		this.left = inputToCopy.left;
+		this.right = inputToCopy.right;
+	}
 }
 
 addEventListener("keydown", function (e) {
@@ -132,8 +139,12 @@ function onRecieveMessage(peerMessageJSON) {
 
 function sendInput(){
 	if(numberOfSentInputs <= numberOfRecievedInputs && debugStopSending == false){
-		sendMessage(new PeerMessage('input', currentInput));
-		localInputBuffer.push(currentInput);
+		// Have to make a copy, otherwise whole array will be of a single reference
+		var inputToSend = new Inputs();
+		inputToSend.copyFromAnotherInput(currentInput);
+
+		sendMessage(new PeerMessage('input', inputToSend));
+		localInputBuffer.push(inputToSend);
 		numberOfSentInputs += 1;
 	}
 	setTimeout(sendInput, 1000/60);
@@ -147,8 +158,8 @@ function onRecieveInput(recievedInput){
 
 function start(){
 	sendInput();
-	gameTick();
 	$(document).trigger(startEvent);
+	gameTick();
 }
 
 function gameTick(){
