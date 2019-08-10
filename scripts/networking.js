@@ -1,5 +1,5 @@
 var localClient;
-var remoteClient;
+var connection;
 
 var currentInputs;
 
@@ -44,10 +44,9 @@ $(document).ready(function() {
 	setLocalClient(new Peer());
 
 	$('#joinButton').click(function (){
-		if(typeof remoteClient == 'undefined' && typeof localClient != undefined){
-			setRemoteClient(localClient.connect($('#joinInput').val()));
+		if(typeof connection == 'undefined' && typeof localClient != undefined){
+			setConnection(localClient.connect($('#joinInput').val()));
 			console.log('Connected to client');
-			networkTick();
 		}
 	});
 });
@@ -61,8 +60,7 @@ function setLocalClient(newClient){
 
 	localClient.on('connection', function(conn){
 		console.log('Got a connection');
-		remoteClient = conn;
-		networkTick();
+		setConnection(conn);
 	});
 
 	localClient.on('error', function(err){
@@ -70,10 +68,43 @@ function setLocalClient(newClient){
 	});
 }
 
-// Put remote client bindings here
-function setRemoteClient(newClient){
-	remoteClient = newClient;
-	remoteClient.on('error', function(err){
+// Put connection bindings here
+function setConnection(newConnection){
+	connection = newConnection;
+
+	connection.on('open', function() {
+			sendMessage(new PeerMessage('testMessage', ''));
+	});
+
+	connection.on('error', function(err){
 		console.log("Remote client error: " + err.type);
 	});
+
+	connection.on('data', function(data){
+		recieveMessage(data);
+	});
+}
+
+function sendMessage(peerMessage){
+	connection.send(JSON.stringify(peerMessage));
+}
+
+function recieveMessage(peerMessageJSON) {
+	var peerMessage;
+	// Only continute if the message is a string
+	if(typeof peerMessageJSON != 'string'){
+		console.log('Recieved data is not a valid PeerMessage');
+		return false;
+	}
+	// Only continue if the message is a json object
+	try {
+		peerMessage = JSON.parse(peerMessageJSON);
+		if(typeof peerMessage.messageName == 'undefined'){
+			console.log('Recieved data is not a valid PeerMessage');
+			return;
+		}
+	} catch (err){
+		console.log('Recieved data is not a valid PeerMessage');
+		return false;
+	}
 }
