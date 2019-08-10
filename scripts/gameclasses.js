@@ -71,6 +71,11 @@ class Player {
 		this.y = y;
 		this.rectangle = new Rectangle(32, 32, this.x, this.y);
 
+		this.hitRight= false;
+		this.hitLeft = false;
+		this.hitTop = false;
+		this.hitBottom = false;
+
 		this.maxMoveSpeed = 5;
 		this.groundFriction = 0.3;
 		this.airFriction = 0.05;
@@ -93,7 +98,72 @@ class Player {
 		return (this.maxMoveSpeed * this.airFriction) / (-this.airFriction + 1.0);
 	}
 
+	updateCollision(){
+		// Reset collision
+		this.hitRight= false;
+		this.hitLeft = false;
+		this.hitTop = false;
+		this.hitBottom = false;
+
+		// Detect collision with rectangles
+		for (var i = 0; i < this.gameWorld.rectangles.length; i++) {
+			var rectangleToCheck = this.gameWorld.rectangles[i];
+			// If player is within vertical bounds of a rectangle
+			if(this.rectangle.bottom() >= rectangleToCheck.top && this.rectangle.top() <= rectangleToCheck.bottom){
+				if(this.rectangle.right() >= rectangleToCheck.left && this.rectangle.left() <= rectangleToCheck.left){
+					this.hitRight = true;
+					this.x = rectangleToCheck.left - this.width;
+					this.velX = 0;
+				}
+
+				if(this.rectangle.left() <= rectangleToCheck.right && this.rectangle.right() >= rectangleToCheck.right){
+					this.hitLeft = true;
+					this.x = rectangleToCheck.right;
+					this.velX = 0;
+				}
+			}
+			// If player is within horizontal bounds of a rectangle
+			if(this.rectangle.right() >= rectangleToCheck.left && this.rectangle.left() <= rectangleToCheck.top){
+				if(this.rectangle.bottom() >= rectangleToCheck.top && this.rectangle.top() <= rectangleToCheck.top){
+					this.hitBottom = true;
+					this.y = rectangleToCheck.top - this.height;
+					this.velY = 0;
+				}
+
+				if(this.rectangle.top() <= rectangleToCheck.bottom && this.rectangle.bottom() >= rectangleToCheck.bottom){
+					this.hitTop = true;
+					this.y = rectangleToCheck.top;
+					this.velY = 0;
+				}
+			}
+		}
+
+		// Detect collision with walls
+		if(this.rectangle.right() >= gameWorld.width){
+			this.hitRight = true;
+			this.x = gameWorld.width - this.rectangle.width;
+			this.velX = 0;
+		}
+		if(this.rectangle.left() <= 0){
+			this.hitLeft = true;
+			this.x = 0;
+			this.velX = 0;
+		}
+		if(this.rectangle.top() <= 0){
+			this.hitTop = true;
+			this.y = 0;
+			this.velY = 0;
+		}
+		if(this.rectangle.bottom() >= gameWorld.height){
+			this.hitBottom = true;
+			this.y = gameWorld.height - this.height;
+			this.velY = 0;
+		}
+	}
+
 	tick() {
+		this.updateCollision();
+
 		// Apply friction
 		this.velX -= this.velX * 0.2;
 
@@ -103,11 +173,18 @@ class Player {
 		if(this.playerInput.right)
 			this.velX += this.groundAcc();
 
+		// Stop x velocity on walls
+		if(this.hitRight && this.velX > 0.0)
+			this.velX = 0;
+		if(this.hitLeft && this.velX < 0.0)
+			this.velX = 0;
+
+		// Apply velocity to position
 		this.x += this.velX;
 		this.y += this.velY;
 
 		// Update rectangle position
 		this.rectangle.x = this.x;
-		this.rectangle.y = this.y
+		this.rectangle.y = this.y;
 	}
 }
