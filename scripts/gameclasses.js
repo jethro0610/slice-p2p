@@ -80,10 +80,15 @@ class Player {
 		this.groundFriction = 0.3;
 		this.airFriction = 0.05;
 
+		this.gravitySpeed = 0.5;
+		this.maxGravity = 10;
+		this.jumpStrength = 10;
+
 		this.velX = 0;
 		this.velY = 0;
 
 		this.playerInput = new Inputs();
+		this.inputUpLastFrame = false;
 	}
 
 	setFriction(newFriction){
@@ -156,16 +161,29 @@ class Player {
 		}
 		if(this.rectangle.bottom() >= gameWorld.height){
 			this.hitBottom = true;
-			this.y = gameWorld.height - this.height;
+			this.y = gameWorld.height - this.rectangle.height;
 			this.velY = 0;
 		}
+	}
+
+	jump(){
+		this.velY = -this.jumpStrength;
 	}
 
 	tick() {
 		this.updateCollision();
 
+		if(!this.inputUpLastFrame && this.playerInput.up)
+			this.jump();
+		this.inputUpLastFrame = this.playerInput.up;
+
 		// Apply friction
 		this.velX -= this.velX * 0.2;
+
+		// Apply gravity
+		this.velY += this.gravitySpeed
+		if(this.velY > this.maxGravity)
+			this.velY = this.maxGravity;
 
 		// Move from input
 		if(this.playerInput.left)
@@ -174,10 +192,14 @@ class Player {
 			this.velX += this.groundAcc();
 
 		// Stop x velocity on walls
-		if(this.hitRight && this.velX > 0.0)
+		if(this.hitRight && this.velX > 0)
 			this.velX = 0;
-		if(this.hitLeft && this.velX < 0.0)
+		if(this.hitLeft && this.velX < 0)
 			this.velX = 0;
+
+		// Stop y velocity on ground
+		if(this.hitBottom && this.velY > 0)
+			this.velY = 0;
 
 		// Apply velocity to position
 		this.x += this.velX;
