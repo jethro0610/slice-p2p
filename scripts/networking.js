@@ -14,6 +14,8 @@ var canTick = false;
 
 var debugStopSending = false;
 
+let tickEvent = new $.Event('tick');
+
 function Inputs() {
 	this.up = false
 	this.down = false;
@@ -137,7 +139,7 @@ function sendInput(){
 function onRecieveInput(recievedInput){
 	remoteInputBuffer.push(recievedInput)
 	numberOfRecievedInputs += 1;
-	console.log("Inputs sent: " + numberOfSentInputs.toString() + " | Inputs recieved: " + numberOfRecievedInputs.toString());
+	//console.log("Inputs sent: " + numberOfSentInputs.toString() + " | Inputs recieved: " + numberOfRecievedInputs.toString());
 }
 
 function gameTick(){
@@ -146,9 +148,13 @@ function gameTick(){
 	}
 
 	if(canTick == true){
-		console.log("Ticking with buffer length: " + remoteInputBuffer.length.toString());
+		//console.log("Ticking with buffer length: " + remoteInputBuffer.length.toString());
 		var localInputThisTick = localInputBuffer.shift();
 		var remoteInputThisTick = remoteInputBuffer.shift();
+
+		tickEvent.localInputThisTick = localInputThisTick;
+		tickEvent.remoteInputThisTick = remoteInputThisTick;
+		$(document).trigger(tickEvent);
 
 		if(remoteInputBuffer.length == 0 || localInputBuffer.length == 0){
 			canTick = false;
