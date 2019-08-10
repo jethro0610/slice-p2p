@@ -1,6 +1,38 @@
 var localClient;
 var remoteClient;
 
+var currentInputs;
+
+function Inputs() {
+	this.up = false
+	this.down = false;
+	this.left = false;
+	this.right = false;
+}
+
+addEventListener("keydown", function (e) {
+	if(e.keyCode == 87)
+		currentInputs.up = true;
+	if(e.keyCode == 83)
+		currentInputs.down = true;
+	if(e.keyCode == 65)
+		currentInputs.left = true;
+	if(e.keyCode == 68)
+		currentInputs.right = true;
+}, false);
+
+addEventListener("keyup", function (e) {
+	if(e.keyCode == 87)
+		currentInputs.up = false;
+	if(e.keyCode == 83)
+		currentInputs.down = false;
+	if(e.keyCode == 65)
+		localClientInputs.left = false;
+	if(e.keyCode == 68)
+		currentInputs.right = false;
+}, false);
+
+
 class PeerMessage {
 	constructor(messageName, messageData){
 		this.messageName = messageName;
@@ -44,15 +76,4 @@ function setRemoteClient(newClient){
 	remoteClient.on('error', function(err){
 		console.log("Remote client error: " + err.type);
 	});
-}
-
-var currentTick = 0;
-function networkTick(){
-	currentTick += 1;
-	console.log(currentTick);
-
-	// Tick again only if the client is set and is connected to another client
-	if(typeof localClient != 'undefined' && typeof remoteClient != 'undefined'){
-		this.setTimeout(networkTick, 1000);
-	}
 }
