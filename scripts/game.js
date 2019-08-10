@@ -29,7 +29,7 @@ function startGame(){
 }
 
 function tick(e){
-	if(isHost == true){
+	if(isHost){
 		player1.playerInput = e.localInputThisTick;
 		player2.playerInput = e.remoteInputThisTick;
 	}

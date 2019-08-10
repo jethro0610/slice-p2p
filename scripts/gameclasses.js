@@ -66,10 +66,14 @@ class Rectangle {
 
 class Player {
 	constructor(x, y, gameWorld) {
+		this.gameWorld = gameWorld;
 		this.x = x;
 		this.y = y;
 		this.rectangle = new Rectangle(32, 32, this.x, this.y);
-		this.gameWorld = gameWorld;
+
+		this.velX = 0;
+		this.velY = 0;
+
 		this.playerInput = new Inputs();
 	}
 
