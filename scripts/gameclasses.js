@@ -3,6 +3,13 @@ function Inputs() {
 	this.down = false;
 	this.left = false;
 	this.right = false;
+
+	this.copyFromAnotherInput = function(inputToCopy){
+		this.up = inputToCopy.up;
+		this.down = inputToCopy.down;
+		this.left = inputToCopy.left;
+		this.right = inputToCopy.right;
+	}
 }
 
 class GameWorld {
@@ -67,6 +74,14 @@ class Player {
 	}
 
 	tick() {
+		if(this.playerInput.up)
+			this.y -= 1;
+		if(this.playerInput.down)
+			this.y += 1;
+		if(this.playerInput.left)
+			this.x -= 1;
+		if(this.playerInput.right)
+			this.x += 1;
 		// Update rectangle position
 		this.rectangle.x = this.x;
 		this.rectangle.y = this.y
