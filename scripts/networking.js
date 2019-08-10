@@ -1,7 +1,16 @@
 var localClient;
 var connection;
 
-var currentInputs = new Inputs();
+var currentInput = new Inputs();
+
+var localInputBuffer = [];
+var remoteInputBuffer = [];
+
+var numberOfSentInputs = 0;
+var numberOfRecievedInputs = 0;
+
+var bufferSize = 6;
+var debugStopSending = false;
 
 function Inputs() {
 	this.up = false
@@ -12,24 +21,24 @@ function Inputs() {
 
 addEventListener("keydown", function (e) {
 	if(e.keyCode == 87)
-		currentInputs.up = true;
+		currentInput.up = true;
 	if(e.keyCode == 83)
-		currentInputs.down = true;
+		currentInput.down = true;
 	if(e.keyCode == 65)
-		currentInputs.left = true;
+		currentInput.left = true;
 	if(e.keyCode == 68)
-		currentInputs.right = true;
+		currentInput.right = true;
 }, false);
 
 addEventListener("keyup", function (e) {
 	if(e.keyCode == 87)
-		currentInputs.up = false;
+		currentInput.up = false;
 	if(e.keyCode == 83)
-		currentInputs.down = false;
+		currentInput.down = false;
 	if(e.keyCode == 65)
-		localClientInputs.left = false;
+		currentInput.left = false;
 	if(e.keyCode == 68)
-		currentInputs.right = false;
+		currentInput.right = false;
 }, false);
 
 
@@ -111,25 +120,23 @@ function onRecieveMessage(peerMessageJSON) {
 	if(peerMessage.messageName == 'input'){
 		onRecieveInput(peerMessage.messageData);
 	}
-
-	if(peerMessage.messageName == 'inputConfirm'){
-		onRecieveInputConfirm();
-	}
 }
 
 function sendInput(){
-	sendMessage(new PeerMessage('input', currentInputs));
+	if(numberOfSentInputs <= numberOfRecievedInputs && debugStopSending == false){
+		sendMessage(new PeerMessage('input', currentInput));
+		numberOfSentInputs += 1;
+	}
+	setTimeout(sendInput, 1000);
 }
 
 function onRecieveInput(recievedInputs){
-	console.log('Recieved inputs');
-	sendInputConfirm();
+	numberOfRecievedInputs += 1;
+
+	console.log("Inputs sent: " + numberOfSentInputs.toString() + " | Inputs recieved: " + numberOfRecievedInputs.toString());
 }
 
-function sendInputConfirm(){
-	sendMessage(new PeerMessage('inputConfirm'), '');
-}
+function gameTick(){
 
-function onRecieveInputConfirm(){
-	sendInput();
+	setTimeout
 }
