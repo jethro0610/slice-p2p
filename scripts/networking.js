@@ -3,8 +3,8 @@ var connection;
 
 var currentInput = new Inputs();
 
-var localInputBuffer = [];
-var remoteInputBuffer = [];
+let localInputBuffer = [];
+let remoteInputBuffer = [];
 
 var numberOfSentInputs = 0;
 var numberOfRecievedInputs = 0;
@@ -13,6 +13,7 @@ var bufferSize = 1;
 var canTick = false;
 
 let tickEvent = new $.Event('tick');
+let newInputEvent = new $.Event('newInput');
 let startEvent = new $.Event('start');
 
 var isHost = false;
@@ -158,7 +159,12 @@ function start(){
 	gameTick();
 }
 
+var lastLocalInput;
+var lastRemoteInput;
+
 function gameTick(){
+	tickEvent.hasInput = false;
+
 	var lowestBuffer = 0;
 	if(localInputBuffer.length < remoteInputBuffer.length){
 		lowestBuffer = localInputBuffer.length;
@@ -166,14 +172,37 @@ function gameTick(){
 	if(localInputBuffer.length > remoteInputBuffer.length){
 		lowestBuffer = remoteInputBuffer.length;
 	}
+	else if(localInputBuffer.length == remoteInputBuffer.length){
+		lowestBuffer = remoteInputBuffer.length;
+	}
+
+	if(lowestBuffer > 0){
+		tickEvent.hasInput = true;
+		$(document).trigger(newInputEvent);
+	}
 
 	for (var i = 0; i < lowestBuffer; i++) {
 		var localInputThisTick = localInputBuffer.shift();
 		var remoteInputThisTick = remoteInputBuffer.shift();
 
+		lastLocalInput = localInputThisTick;
+		lastRemoteInput = remoteInputThisTick;
+
 		tickEvent.localInputThisTick = localInputThisTick;
 		tickEvent.remoteInputThisTick = remoteInputThisTick;
-		tickEvent.
+
+		$(document).trigger(tickEvent);
+	}
+
+	if(!tickEvent.hasInput){
+		tickEvent.localInputThisTick = lastLocalInput;
+		tickEvent.remoteInputThisTick = lastRemoteInput;
+		if(typeof tickEvent.remoteInputThisTick == 'undefined'){
+			tickEvent.remoteInputThisTick = new Inputs();
+		}
+		if(typeof tickEvent.localInputThisTick == 'undefined'){
+			tickEvent.localInputThisTick = new Inputs();
+		}
 		$(document).trigger(tickEvent);
 	}
 	setTimeout(gameTick, 1000/60);
