@@ -9,7 +9,7 @@ var remoteInputBuffer = [];
 var numberOfSentInputs = 0;
 var numberOfRecievedInputs = 0;
 
-var bufferSize = 2;
+var bufferSize = 1;
 var canTick = false;
 
 let tickEvent = new $.Event('tick');
@@ -32,7 +32,7 @@ function Inputs() {
 }
 
 addEventListener("keydown", function (e) {
-	if(e.keyCode == 87)
+	if(e.keyCode == 32)
 		currentInput.up = true;
 	if(e.keyCode == 83)
 		currentInput.down = true;
@@ -43,7 +43,7 @@ addEventListener("keydown", function (e) {
 }, false);
 
 addEventListener("keyup", function (e) {
-	if(e.keyCode == 87)
+	if(e.keyCode == 32)
 		currentInput.up = false;
 	if(e.keyCode == 83)
 		currentInput.down = false;
@@ -136,15 +136,13 @@ function onRecieveMessage(peerMessageJSON) {
 }
 
 function sendInput(){
-	if(numberOfSentInputs <= numberOfRecievedInputs){
-		// Have to make a copy, otherwise whole array will be of a single reference
-		var inputToSend = new Inputs();
-		inputToSend.copyFromAnotherInput(currentInput);
+	// Have to make a copy, otherwise whole array will be of a single reference
+	var inputToSend = new Inputs();
+	inputToSend.copyFromAnotherInput(currentInput);
 
-		sendMessage(new PeerMessage('input', inputToSend));
-		localInputBuffer.push(inputToSend);
-		numberOfSentInputs += 1;
-	}
+	sendMessage(new PeerMessage('input', inputToSend));
+	localInputBuffer.push(inputToSend);
+	numberOfSentInputs += 1;
 	setTimeout(sendInput, 1000/60);
 }
 
@@ -161,22 +159,22 @@ function start(){
 }
 
 function gameTick(){
-	if(remoteInputBuffer.length >= bufferSize && localInputBuffer.length >= bufferSize){
-		canTick = true;
+	var lowestBuffer = 0;
+	if(localInputBuffer.length < remoteInputBuffer.length){
+		lowestBuffer = localInputBuffer.length;
+	}
+	if(localInputBuffer.length > remoteInputBuffer.length){
+		lowestBuffer = remoteInputBuffer.length;
 	}
 
-	if(canTick){
-		//console.log("Ticking with buffer length: " + remoteInputBuffer.length.toString());
+	for (var i = 0; i < lowestBuffer; i++) {
 		var localInputThisTick = localInputBuffer.shift();
 		var remoteInputThisTick = remoteInputBuffer.shift();
 
 		tickEvent.localInputThisTick = localInputThisTick;
 		tickEvent.remoteInputThisTick = remoteInputThisTick;
+		tickEvent.
 		$(document).trigger(tickEvent);
-
-		if(remoteInputBuffer.length == 0 || localInputBuffer.length == 0){
-			canTick = false;
-		}
 	}
 	setTimeout(gameTick, 1000/60);
 }
