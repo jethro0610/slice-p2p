@@ -179,22 +179,22 @@ function gameTick(){
 	if(lowestBuffer > 0){
 		tickEvent.hasInput = true;
 		$(document).trigger(newInputEvent);
-	}
+		for (var i = 0; i < lowestBuffer; i++) {
+			var localInputThisTick = localInputBuffer.shift();
+			var remoteInputThisTick = remoteInputBuffer.shift();
 
-	for (var i = 0; i < lowestBuffer; i++) {
-		var localInputThisTick = localInputBuffer.shift();
-		var remoteInputThisTick = remoteInputBuffer.shift();
+			lastLocalInput = localInputThisTick;
+			lastRemoteInput = remoteInputThisTick;
 
-		lastLocalInput = localInputThisTick;
-		lastRemoteInput = remoteInputThisTick;
+			tickEvent.localInputThisTick = localInputThisTick;
+			tickEvent.remoteInputThisTick = remoteInputThisTick;
 
-		tickEvent.localInputThisTick = localInputThisTick;
-		tickEvent.remoteInputThisTick = remoteInputThisTick;
-
-		$(document).trigger(tickEvent);
+			$(document).trigger(tickEvent);
+		}
 	}
 
 	if(!tickEvent.hasInput){
+		/*
 		tickEvent.localInputThisTick = lastLocalInput;
 		tickEvent.remoteInputThisTick = lastRemoteInput;
 		if(typeof tickEvent.remoteInputThisTick == 'undefined'){
@@ -204,6 +204,7 @@ function gameTick(){
 			tickEvent.localInputThisTick = new Inputs();
 		}
 		$(document).trigger(tickEvent);
+		*/
 	}
 	setTimeout(gameTick, 1000/60);
 }
