@@ -192,7 +192,7 @@ function gameTick(){
 			$(document).trigger(tickEvent);
 		}
 	}
-
+	console.log(localInputBuffer.length);
 	if(!tickEvent.hasInput){
 		/*
 		tickEvent.localInputThisTick = lastLocalInput;
