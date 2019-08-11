@@ -137,13 +137,20 @@ function onRecieveMessage(peerMessageJSON) {
 }
 
 function sendInput(){
-	// Have to make a copy, otherwise whole array will be of a single reference
-	var inputToSend = new Inputs();
-	inputToSend.copyFromAnotherInput(currentInput);
+	// Send two inputs if the client is behind
+	var timesToSend = 1;
+	if(localInputBuffer.length < remoteInputBuffer.length)
+		timesToSend = 2;
 
-	sendMessage(new PeerMessage('input', inputToSend));
-	localInputBuffer.push(inputToSend);
-	numberOfSentInputs += 1;
+	for (var i = 0; i < timesToSend; i++) {
+		// Have to make a copy, otherwise whole array will be of a single reference
+		var inputToSend = new Inputs();
+		inputToSend.copyFromAnotherInput(currentInput);
+
+		sendMessage(new PeerMessage('input', inputToSend));
+		localInputBuffer.push(inputToSend);
+		numberOfSentInputs += 1;
+	}
 	setTimeout(sendInput, 1000/60);
 }
 
@@ -180,21 +187,17 @@ function gameTick(){
 		tickEvent.hasInput = true;
 		$(document).trigger(newInputEvent);
 		for (var i = 0; i < lowestBuffer; i++) {
-			var localInputThisTick = localInputBuffer.shift();
-			var remoteInputThisTick = remoteInputBuffer.shift();
+			lastLocalInput = localInputBuffer.shift();
+			lastRemoteInput = remoteInputBuffer.shift();
 
-			lastLocalInput = localInputThisTick;
-			lastRemoteInput = remoteInputThisTick;
-
-			tickEvent.localInputThisTick = localInputThisTick;
-			tickEvent.remoteInputThisTick = remoteInputThisTick;
+			tickEvent.localInputThisTick = lastLocalInput;
+			tickEvent.remoteInputThisTick = lastRemoteInput;
 
 			$(document).trigger(tickEvent);
 		}
 	}
-	console.log(localInputBuffer.length);
+	/*
 	if(!tickEvent.hasInput){
-		/*
 		tickEvent.localInputThisTick = lastLocalInput;
 		tickEvent.remoteInputThisTick = lastRemoteInput;
 		if(typeof tickEvent.remoteInputThisTick == 'undefined'){
@@ -204,7 +207,7 @@ function gameTick(){
 			tickEvent.localInputThisTick = new Inputs();
 		}
 		$(document).trigger(tickEvent);
-		*/
 	}
+	*/
 	setTimeout(gameTick, 1000/60);
 }
