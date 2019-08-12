@@ -12,7 +12,9 @@ var numberOfRecievedInputs = 0;
 var bufferSize = 1;
 var canTick = false;
 
+let startTickEvent = new $.Event('start-tick');
 let tickEvent = new $.Event('net-tick');
+let endTickEvent = new $.Event('end-tick');
 let startEvent = new $.Event('start');
 
 var isHost = false;
@@ -181,6 +183,7 @@ function netTick(){
 	}
 
 	if(lowestBuffer > 0){
+		$(document).trigger(startTickEvent);
 		for (var i = 0; i < lowestBuffer; i++) {
 			tickEvent.hasInput = true;
 			lastLocalInput = localInputBuffer.shift();
@@ -191,6 +194,7 @@ function netTick(){
 
 			$(document).trigger(tickEvent);
 		}
+		$(document).trigger(endTickEvent);
 	}
 	
 	setTimeout(netTick, 1000/60);
