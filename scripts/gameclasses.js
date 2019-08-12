@@ -337,12 +337,22 @@ class Player {
 				// Dash contact
 				if(this.rectangle.isIntersecting(playerToCheck.rectangle) && this.dashing){
 					if(playerToCheck.dashing){
-						if(this.direction = 'right'){
+						if(playerToCheck.direction == 'right'){
+							playerToCheck.velX = -playerToCheck.dashSpeed;
+						}
+						else{
+							playerToCheck.velX = playerToCheck.dashSpeed;
+						}
+						playerToCheck.canDash = true;
+						playerToCheck.dashing = false;
+						playerToCheck.dashTimer = 0;
+						playerToCheck.moveCooldown = 5;
+						
+						if(this.direction == 'right'){
 							this.velX = -this.dashSpeed;
 						}
 						else{
 							this.velX = this.dashSpeed;
-							this.dashing = false;
 						}
 						this.canDash = true;
 						this.dashing = false;
