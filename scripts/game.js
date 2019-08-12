@@ -64,5 +64,5 @@ function draw(){
 		//context.fillRect(gameWorld.players[i].drawX, gameWorld.players[i].drawY, gameWorld.players[i].rectangle.width, gameWorld.players[i].rectangle.height);
 		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, playerToDraw.drawX  - 48, playerToDraw.drawY, 32 * 4, 16 * 4);
 	}
-	setTimeout(draw, 1000/60);
+	setTimeout(draw, 1000/120);
 }

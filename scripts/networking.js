@@ -158,7 +158,7 @@ function sendInput(){
 		localInputBuffer.push(inputToSend);
 		numberOfSentInputs += 1;
 	}
-	setTimeout(sendInput, 1000/60);
+	setTimeout(sendInput, 1000/120);
 }
 
 function onRecieveInput(recievedInput){
@@ -203,5 +203,5 @@ function netTick(){
 		$(document).trigger(endTickEvent);
 	}
 	
-	setTimeout(netTick, 1000/60);
+	setTimeout(netTick, 1000/120);
 }

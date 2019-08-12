@@ -128,7 +128,7 @@ class Player {
 		this.hitCooldown = 0;
 		this.hitCooldownLength = 20;
 
-		this.timeDialation = 1;
+		this.timeDialation = 0.5;
 
 		this.drawX = this.x;
 		this.drawY = this.y;
@@ -389,10 +389,10 @@ class Player {
 		}
 
 		if(slowMo){
-			this.timeDialation = 0.05;
+			this.timeDialation = 0.05 / 2;
 		}
 		else{
-			this.timeDialation = 1;
+			this.timeDialation = 0.5;
 		}
 
 		// Apply velocity to position
