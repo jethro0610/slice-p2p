@@ -53,11 +53,11 @@ function startNetTick(){
 function gameNetTick(e){
 	if(isHost){
 		player1.playerInput = e.localInputThisTick;
-		player2.playerInput = e.localInputThisTick;
+		player2.playerInput = e.remoteInputThisTick;
 	}
 	else{
 		player1.playerInput = e.remoteInputThisTick;
-		player2.playerInput = e.remoteInputThisTick;
+		player2.playerInput = e.localInputThisTick;
 	}
 
 	gameWorld.tick();
@@ -73,10 +73,10 @@ function endNetTick(){
 
 function gameTick(){
 	var extrapolationStrength = 0.5;
-	player1DrawX = (player1DrawX)*extrapolationStrength + (player1DrawX + player1.velX)*(1-extrapolationStrength);
-	player1DrawY = (player1DrawY)*extrapolationStrength + (player1DrawY + player1.velY)*(1-extrapolationStrength);
-	player2DrawX = (player2DrawX)*extrapolationStrength + (player2DrawX + player2.velX)*(1-extrapolationStrength);
-	player2DrawY = (player2DrawY)*extrapolationStrength + (player2DrawY + player2.velY)*(1-extrapolationStrength);
+	player1DrawX = (player1DrawX)*extrapolationStrength + (player1DrawX + player1.velX * player1.timeDialation)*(1-extrapolationStrength);
+	player1DrawY = (player1DrawY)*extrapolationStrength + (player1DrawY + player1.velY * player1.timeDialation)*(1-extrapolationStrength);
+	player2DrawX = (player2DrawX)*extrapolationStrength + (player2DrawX + player2.velX * player2.timeDialation)*(1-extrapolationStrength);
+	player2DrawY = (player2DrawY)*extrapolationStrength + (player2DrawY + player2.velY * player2.timeDialation)*(1-extrapolationStrength);
 
 	if(player1DrawX < 0)
 		player1DrawX = 0;
