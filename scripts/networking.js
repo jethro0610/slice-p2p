@@ -139,7 +139,7 @@ function onRecieveMessage(peerMessageJSON) {
 function sendInput(){
 	// Send two inputs if the client is behind
 	var timesToSend = 1;
-	if(localInputBuffer.length < remoteInputBuffer.length)
+	if(localInputBuffer.length < remoteInputBuffer.length - 1)
 		timesToSend = 2;
 
 	for (var i = 0; i < timesToSend; i++) {
@@ -196,7 +196,7 @@ function gameTick(){
 			$(document).trigger(tickEvent);
 		}
 	}
-	/*
+	/* Extrapolation code
 	if(!tickEvent.hasInput){
 		tickEvent.localInputThisTick = lastLocalInput;
 		tickEvent.remoteInputThisTick = lastRemoteInput;

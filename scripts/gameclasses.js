@@ -177,6 +177,7 @@ class Player {
 			if(this.hitBottom)
 				this.jump();
 		}
+
 		this.inputUpLastFrame = this.playerInput.up;
 
 		// Apply gravity

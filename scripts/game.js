@@ -59,6 +59,9 @@ function onNewInput(){
 	player1.velY = lastVY1;
 	player2.velX = lastVX2;
 	player2.velY = lastVY2;
+
+	player1.updateCollision();
+	player2.updateCollision();
 }
 
 
