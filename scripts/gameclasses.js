@@ -133,6 +133,13 @@ class Player {
 		this.drawX = this.x;
 		this.drawY = this.y;
 		this.extrapolationStrength = 0.5;
+
+		this.animState = 'idle';
+		this.spriteSheet = new Image();
+		this.spriteSheet.src = 'sprites/slicePlayer.ss.png';
+		this.spriteFrame = 0;
+
+		this.runStateTick = 0;
 	}
 
 	setFriction(newFriction){
@@ -413,5 +420,68 @@ class Player {
 			this.drawX = 0;
 		if(this.drawY + this.rectangle.height > this.gameWorld.height)
 			this.drawY = this.gameWorld.height - this.rectangle.height;
+
+		this.updateAnimState();
+
+		if(this.animState == 'idle')
+			this.spriteFrame = 0;
+
+		if(this.animState == 'jump')
+			this.spriteFrame = 1;
+
+		if(this.animState == 'midFall')
+			this.spriteFrame = 2;
+
+		if(this.animState == 'fall')
+			this.spriteFrame = 3;
+
+		if(this.animState == 'dash')
+			this.spriteFrame = 5;
+
+		if(this.animState == 'endDash')
+			this.spriteFrame = 8;
+
+		if(this.animState == 'run'){
+			this.runStateTick += this.timeDialation;
+			if(this.runStateTick >= 10){
+			this.spriteFrame += 1;
+			this.runStateTick = 0;
+			}
+			if(this.spriteFrame < 4 || this.spriteFrame > 7){
+				this.spriteFrame = 4;
+			}
+		}
+	}
+
+	updateAnimState(){
+		if(!this.hitBottom){
+			if(this.canDash){
+				if(this.velY < 0){
+					this.animState = 'jump';
+				}
+				else if(this.velY > 2){
+					this.animState = 'fall';
+				}
+				else{
+					this.animState = 'midFall'
+				}
+			}
+			else{
+				this.animState = 'endDash';
+			}
+		}
+		
+		if(this.hitBottom){
+			if(this.playerInput.right && this.velX != 0 || this.playerInput.left && this.velX != 0){
+				this.animState = 'run'
+			}
+			else{
+				this.animState = 'idle';
+			}
+		}
+
+		if(this.dashing){
+			this.animState = 'dash';
+		}
 	}
 }

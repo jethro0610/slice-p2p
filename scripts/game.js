@@ -20,6 +20,7 @@ function startGame(){
 			this.canvas.width = gameWorld.width;
 			this.canvas.height = gameWorld.height;
 			this.context = this.canvas.getContext('2d');
+			this.context.imageSmoothingEnabled = false;
 			document.body.appendChild(this.canvas);
 		},
 		clear : function(){
@@ -54,9 +55,14 @@ function draw(){
 	}
 	// Draw all players
 	for(var i = 0; i < gameWorld.players.length; i++){
-	 	gameWorld.players[i].drawTick();
-	 	context.fillStyle = 'red';
-		context.fillRect(gameWorld.players[i].drawX, gameWorld.players[i].drawY, gameWorld.players[i].rectangle.width, gameWorld.players[i].rectangle.height);
+		var playerToDraw = gameWorld.players[i];
+		var spriteYOffset = 0;
+		if(playerToDraw.direction == 'left')
+			spriteYOffset = 17;
+	 	playerToDraw.drawTick();
+	 	//context.fillStyle = 'red';
+		//context.fillRect(gameWorld.players[i].drawX, gameWorld.players[i].drawY, gameWorld.players[i].rectangle.width, gameWorld.players[i].rectangle.height);
+		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, playerToDraw.drawX  - 48, playerToDraw.drawY, 32 * 4, 16 * 4);
 	}
 	setTimeout(draw, 1000/60);
 }
