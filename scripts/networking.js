@@ -24,12 +24,14 @@ function Inputs() {
 	this.down = false;
 	this.left = false;
 	this.right = false;
+	this.dash = false;
 
 	this.copyFromAnotherInput = function(inputToCopy){
 		this.up = inputToCopy.up;
 		this.down = inputToCopy.down;
 		this.left = inputToCopy.left;
 		this.right = inputToCopy.right;
+		this.dash = inputToCopy.dash;
 	}
 }
 
@@ -42,6 +44,8 @@ addEventListener("keydown", function (e) {
 		currentInput.left = true;
 	if(e.keyCode == 68)
 		currentInput.right = true;
+	if(e.keyCode == 16)
+		currentInput.dash = true;
 }, false);
 
 addEventListener("keyup", function (e) {
@@ -53,6 +57,8 @@ addEventListener("keyup", function (e) {
 		currentInput.left = false;
 	if(e.keyCode == 68)
 		currentInput.right = false;
+	if(e.keyCode == 16)
+		currentInput.dash = false;
 }, false);
 
 

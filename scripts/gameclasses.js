@@ -3,12 +3,14 @@ function Inputs() {
 	this.down = false;
 	this.left = false;
 	this.right = false;
+	this.dash = false;
 
 	this.copyFromAnotherInput = function(inputToCopy){
 		this.up = inputToCopy.up;
 		this.down = inputToCopy.down;
 		this.left = inputToCopy.left;
 		this.right = inputToCopy.right;
+		this.dash = inputToCopy.dash;
 	}
 }
 
@@ -69,7 +71,7 @@ class Player {
 		this.gameWorld = gameWorld;
 		this.x = x;
 		this.y = y;
-		this.rectangle = new Rectangle(32, 32, this.x, this.y);
+		this.rectangle = new Rectangle(32, 64, this.x, this.y);
 
 		this.hitRight= false;
 		this.hitLeft = false;
@@ -77,7 +79,7 @@ class Player {
 		this.hitBottom = false;
 
 		this.maxMoveSpeed = 10;
-		this.groundFriction = 0.3;
+		this.groundFriction = 0.1;
 		this.airFriction = 0.05;
 
 		this.gravitySpeed = 1;
@@ -89,6 +91,12 @@ class Player {
 
 		this.playerInput = new Inputs();
 		this.inputUpLastFrame = false;
+
+		this.dashSpeed = 30;
+		this.dashLength = 5;
+		this.dashTimer = 0;
+		this.canDash = true;
+		this.dashing = false;
 	}
 
 	setFriction(newFriction){
@@ -173,17 +181,17 @@ class Player {
 	tick() {
 		this.updateCollision();
 
-		if(!this.inputUpLastFrame && this.playerInput.up){
-			if(this.hitBottom)
-				this.jump();
-		}
+		if(this.hitBottom && this.playerInput.up)
+			this.jump();
 
 		this.inputUpLastFrame = this.playerInput.up;
 
 		// Apply gravity
-		this.velY += this.gravitySpeed;
-		if(this.velY > this.maxGravity)
-			this.velY = this.maxGravity;
+		if(!this.dashing){
+			this.velY += this.gravitySpeed;
+			if(this.velY > this.maxGravity)
+				this.velY = this.maxGravity;
+		}
 
 		// If on ground...
 		if(this.hitBottom){
@@ -203,6 +211,30 @@ class Player {
 				this.velX -= this.airAcc();
 			if(this.playerInput.right)
 				this.velX += this.airAcc();
+		}
+
+		// Dashing
+		if(this.playerInput.dash && this.canDash && !this.hitBottom){
+			this.dashing = true;
+			this.canDash = false;
+			this.velY *= 0.5;
+		}
+
+		if(this.dashTimer >= this.dashLength){
+			this.dashing = false;
+			this.velX *= 0.2;
+			this.dashTimer = 0;
+		}
+
+		if(this.dashing){
+			this.dashTimer += 1;
+			this.velX = this.dashSpeed;
+		}
+
+		if(this.hitBottom){
+			this.canDash = true;
+			this.dashing = false;
+			this.dashTimer = 0;
 		}
 
 		// Stop x velocity on walls
