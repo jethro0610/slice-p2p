@@ -89,6 +89,8 @@ class Player {
 		this.velX = 0;
 		this.velY = 0;
 
+		this.direction = 'right';
+
 		this.playerInput = new Inputs();
 		this.inputUpLastFrame = false;
 
@@ -193,24 +195,29 @@ class Player {
 				this.velY = this.maxGravity;
 		}
 
-		// If on ground...
+		// Movement
+		var frictionToUse;;
+		var accelerationToUse;
 		if(this.hitBottom){
-			// Apply friction
-			this.velX -= this.velX * this.groundFriction;
-			// Move from input
-			if(this.playerInput.left)
-				this.velX -= this.groundAcc();
-			if(this.playerInput.right)
-				this.velX += this.groundAcc();
+			frictionToUse = this.groundFriction;
+			accelerationToUse = this.groundAcc();
 		}
 		else{
-			// Apply friction
-			this.velX -= this.velX * this.airFriction;
-			// Move from input
-			if(this.playerInput.left)
-				this.velX -= this.airAcc();
-			if(this.playerInput.right)
-				this.velX += this.airAcc();
+			frictionToUse = this.airFriction;
+			accelerationToUse = this.airAcc();
+		}
+		// Apply friction
+		this.velX -= this.velX * frictionToUse;
+		// Move from input
+		if(this.playerInput.left){
+			this.velX -= accelerationToUse;
+			if(!this.dashing)
+				this.direction = 'left';
+		}
+		if(this.playerInput.right){
+			this.velX += accelerationToUse;
+			if(!this.dashing)
+				this.direction = 'right';
 		}
 
 		// Dashing
@@ -228,7 +235,12 @@ class Player {
 
 		if(this.dashing){
 			this.dashTimer += 1;
-			this.velX = this.dashSpeed;
+			if(this.direction == 'right'){
+				this.velX = this.dashSpeed;
+			}
+			else{
+				this.velX = -this.dashSpeed;
+			}
 		}
 
 		if(this.hitBottom){
