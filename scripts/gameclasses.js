@@ -82,6 +82,8 @@ class Player {
 		this.groundFriction = 0.1;
 		this.airFriction = 0.05;
 
+		this.pivotSpeed = 0.6
+
 		this.gravitySpeed = 1;
 		this.maxGravity = 15;
 		this.jumpStrength = 20;
@@ -210,12 +212,22 @@ class Player {
 		this.velX -= this.velX * frictionToUse;
 		// Move from input
 		if(this.playerInput.left){
-			this.velX -= accelerationToUse;
+			if(this.velX <= 0 || !this.hitBottom){
+				this.velX -= accelerationToUse;
+			}
+			else{
+				this.velX = -this.velX * this.pivotSpeed;
+			}
 			if(!this.dashing)
 				this.direction = 'left';
 		}
 		if(this.playerInput.right){
-			this.velX += accelerationToUse;
+			if(this.velX >= 0 || !this.hitBottom){
+				this.velX += accelerationToUse;
+			}
+			else{
+				this.velX = -this.velX * this.pivotSpeed;
+			}
 			if(!this.dashing)
 				this.direction = 'right';
 		}
