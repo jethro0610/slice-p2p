@@ -286,7 +286,8 @@ class Player {
 		if(this.playerInput.dash && this.canDash && !this.hitBottom){
 			this.dashing = true;
 			this.canDash = false;
-			this.velY *= 0.5;
+			if(this.velY < 0)
+				this.velY *= 0.5;
 		}
 
 		if(this.dashTimer >= this.dashLength){
