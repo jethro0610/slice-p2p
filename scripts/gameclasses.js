@@ -173,31 +173,28 @@ class Player {
 		for (var i = 0; i < this.gameWorld.rectangles.length; i++) {
 			var rectangleToCheck = this.gameWorld.rectangles[i];
 			// If player is within vertical bounds of a rectangle
-			if(this.rectangle.bottom() >= rectangleToCheck.top && this.rectangle.top() <= rectangleToCheck.bottom){
-				if(this.rectangle.right() >= rectangleToCheck.left && this.rectangle.left() <= rectangleToCheck.left){
+			if(this.rectangle.bottom() >= rectangleToCheck.top() && this.rectangle.top() <= rectangleToCheck.bottom()){
+				if(this.rectangle.right() >= rectangleToCheck.left && this.rectangle.right() <= rectangleToCheck.left() + this.velX && this.rectangle.left() <= rectangleToCheck.left()){
 					this.hitRight = true;
-					this.x = rectangleToCheck.left - this.width;
-					this.velX = 0;
+					this.x = rectangleToCheck.left() - this.rectangle.width;
 				}
 
-				if(this.rectangle.left() <= rectangleToCheck.right && this.rectangle.right() >= rectangleToCheck.right){
+				if(this.rectangle.left() <= rectangleToCheck.right() && this.rectangle.right() <= rectangleToCheck.left() + this.velX && this.rectangle.right() >= rectangleToCheck.right()){
 					this.hitLeft = true;
-					this.x = rectangleToCheck.right;
-					this.velX = 0;
+					this.x = rectangleToCheck.right();
 				}
 			}
 			// If player is within horizontal bounds of a rectangle
-			if(this.rectangle.right() >= rectangleToCheck.left && this.rectangle.left() <= rectangleToCheck.top){
-				if(this.rectangle.bottom() >= rectangleToCheck.top && this.rectangle.top() <= rectangleToCheck.top){
+			if(this.rectangle.right() >= rectangleToCheck.left() && this.rectangle.left() <= rectangleToCheck.right()){
+				if(this.rectangle.bottom() >= rectangleToCheck.top() && this.velY >= 0 && this.rectangle.top() <= rectangleToCheck.top()){
 					this.hitBottom = true;
-					this.y = rectangleToCheck.top - this.height;
-					this.velY = 0;
+					this.y = rectangleToCheck.top() - this.rectangle.height;
 				}
 
-				if(this.rectangle.top() <= rectangleToCheck.bottom && this.rectangle.bottom() >= rectangleToCheck.bottom){
-					this.hitTop = true;
-					this.y = rectangleToCheck.top;
-					this.velY = 0;
+				if(this.rectangle.top() <= rectangleToCheck.bottom() && this.rectangle.bottom() >= rectangleToCheck.bottom()){
+					//this.hitTop = true;
+					//this.y = rectangleToCheck.bottom();
+					//this.velY = 0;
 				}
 			}
 		}
@@ -315,10 +312,10 @@ class Player {
 		}
 
 		// Stop x velocity on walls
-		if(this.hitRight && this.velX > 0)
-			this.velX = 0;
-		if(this.hitLeft && this.velX < 0)
-			this.velX = 0;
+		//if(this.hitRight && this.velX > 0)
+			//this.velX = 0;
+		//if(this.hitLeft && this.velX < 0)
+			//this.velX = 0;
 
 		// Stop y velocity on ground
 		if(this.hitBottom && this.velY > 0)
