@@ -3,16 +3,6 @@ var player1;
 var player2;
 var gameCanvas;
 
-var player1DrawX;
-var player1DrawY;
-var player2DrawX;
-var player2DrawY;
-
-var player1LastX;
-var player1LastY;
-var player2LastX;
-var player2LastY;
-
 $(document).ready(function() {
 	$(document).on('start', startGame);
 	$(document).on('start-tick', startNetTick);
@@ -25,10 +15,6 @@ function startGame(){
 	player1 = gameWorld.addPlayer(0, 0);
 	player2 = gameWorld.addPlayer(300, 0);
 	player2.direction = 'left';
-	player1DrawX = player1.x;
-	player1DrawY = player1.y;
-	player2DrawX = player2.x;
-	player2DrawY = player2.y;
 
 	gameCanvas = {
 		canvas : document.createElement('canvas'),
@@ -43,7 +29,7 @@ function startGame(){
 		}
 	}
 	gameCanvas.init();
-	gameTick();
+	draw();
 }
 
 function startNetTick(){
@@ -61,43 +47,10 @@ function gameNetTick(e){
 	}
 
 	gameWorld.tick();
-	player1DrawX = player1.x;
-	player1DrawY = player1.y;
-	player2DrawX = player2.x;
-	player2DrawY = player2.y;
 }
 
 function endNetTick(){
 
-}
-
-function gameTick(){
-	var extrapolationStrength = 0.5;
-	player1DrawX = (player1DrawX)*extrapolationStrength + (player1DrawX + player1.velX * player1.timeDialation)*(1-extrapolationStrength);
-	player1DrawY = (player1DrawY)*extrapolationStrength + (player1DrawY + player1.velY * player1.timeDialation)*(1-extrapolationStrength);
-	player2DrawX = (player2DrawX)*extrapolationStrength + (player2DrawX + player2.velX * player2.timeDialation)*(1-extrapolationStrength);
-	player2DrawY = (player2DrawY)*extrapolationStrength + (player2DrawY + player2.velY * player2.timeDialation)*(1-extrapolationStrength);
-
-	if(player1DrawX < 0)
-		player1DrawX = 0;
-	if(player1DrawX + player1.rectangle.width > gameWorld.width)
-		player1DrawX = gameWorld.width - player1.rectangle.width;
-	if(player1DrawY < 0)
-		player1DrawY = 0;
-	if(player1DrawY + player1.rectangle.height > gameWorld.height)
-		player1DrawY = gameWorld.height - player1.rectangle.height;
-
-	if(player2DrawX < 0)
-		player2DrawX = 0;
-	if(player2DrawX + player2.rectangle.width > gameWorld.width)
-		player2DrawX = gameWorld.width - player2.rectangle.width;
-	if(player2DrawY < 0)
-		player2DrawY = 0;
-	if(player2DrawY + player2.rectangle.height > gameWorld.height)
-		player2DrawY = gameWorld.height - player2.rectangle.height;
-
-	draw();
-	setTimeout(gameTick, 1000/60);
 }
 
 function draw(){
@@ -109,16 +62,11 @@ function draw(){
 	  	context.fillStyle = 'black';
 	  	context.fillRect(gameWorld.rectangles[i].x, gameWorld.rectangles[i].y, gameWorld.rectangles[i].width, gameWorld.rectangles[i].height);
 	}
-	/*
+	
 	for(var i = 0; i < gameWorld.players.length; i++){
+	 	gameWorld.players[i].extrapolateDrawPosition();
 	 	context.fillStyle = 'red';
-	  	context.fillRect(gameWorld.players[i].rectangle.x, gameWorld.players[i].rectangle.y, gameWorld.players[i].rectangle.width, gameWorld.players[i].rectangle.height);
+		context.fillRect(gameWorld.players[i].drawX, gameWorld.players[i].drawY, gameWorld.players[i].rectangle.width, gameWorld.players[i].rectangle.height);
 	}
-	*/
-
-	context.fillStyle = 'red';
-	context.fillRect(player1DrawX, player1DrawY, player1.rectangle.width, player1.rectangle.height);
-
-	context.fillStyle = 'blue';
-	context.fillRect(player2DrawX, player2DrawY, player2.rectangle.width, player2.rectangle.height);
+	setTimeout(draw, 1000/60);
 }

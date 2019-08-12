@@ -14,6 +14,10 @@ function Inputs() {
 	}
 }
 
+function lerp(value1, value2, t){
+	return value1*t + value2*(1-t);
+}
+
 function getDistance(point1, point2){
 	return Math.abs(point1 - point2);
 }
@@ -125,6 +129,10 @@ class Player {
 		this.hitCooldownLength = 20;
 
 		this.timeDialation = 1;
+
+		this.drawX = this.x;
+		this.drawY = this.y;
+		this.extrapolationStrength = 0.5;
 	}
 
 	setFriction(newFriction){
@@ -387,5 +395,23 @@ class Player {
 		// Update rectangle position
 		this.rectangle.x = this.x;
 		this.rectangle.y = this.y;
+		
+		// Update draw position
+		this.drawX = this.x;
+		this.drawY = this.y
+	}
+
+	extrapolateDrawPosition(){
+		this.drawX = lerp(this.drawX, this.drawX + this.velX * this.timeDialation, this.extrapolationStrength);
+		this.drawY = lerp(this.drawY, this.drawY + this.velY * this.timeDialation, this.extrapolationStrength);
+
+		if(this.drawX < 0)
+			this.drawX = 0;
+		if(this.drawX + this.rectangle.width > this.gameWorld.width)
+			this.drawX = this.gameWorld.width - this.rectangle.width;
+		if(this.drawY < 0)
+			this.drawX = 0;
+		if(this.drawY + this.rectangle.height > this.gameWorld.height)
+			this.drawY = this.gameWorld.height - this.rectangle.height;
 	}
 }
