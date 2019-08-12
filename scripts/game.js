@@ -24,7 +24,7 @@ function startGame(){
 	gameWorld = new GameWorld(500, 500);
 	player1 = gameWorld.addPlayer(0, 0);
 	player2 = gameWorld.addPlayer(300, 0);
-
+	player2.direction = 'left';
 	player1DrawX = player1.x;
 	player1DrawY = player1.y;
 	player2DrawX = player2.x;
@@ -53,11 +53,11 @@ function startNetTick(){
 function gameNetTick(e){
 	if(isHost){
 		player1.playerInput = e.localInputThisTick;
-		player2.playerInput = e.remoteInputThisTick;
+		player2.playerInput = e.localInputThisTick;
 	}
 	else{
 		player1.playerInput = e.remoteInputThisTick;
-		player2.playerInput = e.localInputThisTick;
+		player2.playerInput = e.remoteInputThisTick;
 	}
 
 	gameWorld.tick();
@@ -119,6 +119,6 @@ function draw(){
 	context.fillStyle = 'red';
 	context.fillRect(player1DrawX, player1DrawY, player1.rectangle.width, player1.rectangle.height);
 
-	context.fillStyle = 'red';
+	context.fillStyle = 'blue';
 	context.fillRect(player2DrawX, player2DrawY, player2.rectangle.width, player2.rectangle.height);
 }
