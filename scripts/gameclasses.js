@@ -401,7 +401,7 @@ class Player {
 		this.drawY = this.y
 	}
 
-	extrapolateDrawPosition(){
+	drawTick(){
 		this.drawX = lerp(this.drawX, this.drawX + this.velX * this.timeDialation, this.extrapolationStrength);
 		this.drawY = lerp(this.drawY, this.drawY + this.velY * this.timeDialation, this.extrapolationStrength);
 

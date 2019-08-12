@@ -52,9 +52,9 @@ function draw(){
 	  	context.fillStyle = 'black';
 	  	context.fillRect(gameWorld.rectangles[i].x, gameWorld.rectangles[i].y, gameWorld.rectangles[i].width, gameWorld.rectangles[i].height);
 	}
-	
+	// Draw all players
 	for(var i = 0; i < gameWorld.players.length; i++){
-	 	gameWorld.players[i].extrapolateDrawPosition();
+	 	gameWorld.players[i].drawTick();
 	 	context.fillStyle = 'red';
 		context.fillRect(gameWorld.players[i].drawX, gameWorld.players[i].drawY, gameWorld.players[i].rectangle.width, gameWorld.players[i].rectangle.height);
 	}
