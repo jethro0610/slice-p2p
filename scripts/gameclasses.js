@@ -119,6 +119,8 @@ class Player {
 		this.moveCooldownLength = 10;
 		this.hitCooldown = 0;
 		this.hitCooldownLength = 20;
+
+		this.timeDialation = 0.25;
 	}
 
 	setFriction(newFriction){
@@ -205,7 +207,7 @@ class Player {
 
 		// Move cooldown
 		if(this.moveCooldown > 0){
-			this.moveCooldown -= 1;
+			this.moveCooldown -= 1 * this.timeDialation;
 			this.playerInput = new Inputs();
 		}
 
@@ -216,7 +218,7 @@ class Player {
 
 		// Apply gravity
 		if(!this.dashing){
-			this.velY += this.gravitySpeed;
+			this.velY += this.gravitySpeed * this.timeDialation;
 			if(this.velY > this.maxGravity)
 				this.velY = this.maxGravity;
 		}
@@ -225,12 +227,12 @@ class Player {
 		var frictionToUse;;
 		var accelerationToUse;
 		if(this.hitBottom){
-			frictionToUse = this.groundFriction;
-			accelerationToUse = this.groundAcc();
+			frictionToUse = this.groundFriction * this.timeDialation;
+			accelerationToUse = this.groundAcc() * this.timeDialation;
 		}
 		else{
-			frictionToUse = this.airFriction;
-			accelerationToUse = this.airAcc();
+			frictionToUse = this.airFriction * this.timeDialation;
+			accelerationToUse = this.airAcc() * this.timeDialation;
 		}
 		// Apply friction
 		this.velX -= this.velX * frictionToUse;
@@ -270,7 +272,7 @@ class Player {
 		}
 
 		if(this.dashing){
-			this.dashTimer += 1;
+			this.dashTimer += 1 * this.timeDialation;
 			if(this.direction == 'right'){
 				this.velX = this.dashSpeed;
 			}
@@ -295,16 +297,12 @@ class Player {
 		if(this.hitBottom && this.velY > 0)
 			this.velY = 0;
 
-		// Apply velocity to position
-		this.x += this.velX;
-		this.y += this.velY;
-
 		// Hit cooldown
 		if(this.hitCooldown > 0){
-			this.hitCooldown -= 1;
+			this.hitCooldown -= 1 * this.timeDialation;
 		}
 
-		// Collision with other players
+		// Interaction with other players
 		for (var i = 0; i < this.gameWorld.players.length; i++) {
 			var playerToCheck = this.gameWorld.players[i];
 			if(this.rectangle.isIntersecting(playerToCheck.rectangle) && this.dashing){
@@ -320,6 +318,10 @@ class Player {
 				}
 			}
 		}
+
+		// Apply velocity to position
+		this.x += this.velX * this.timeDialation;
+		this.y += this.velY * this.timeDialation;
 
 		// Update rectangle position
 		this.rectangle.x = this.x;
