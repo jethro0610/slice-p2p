@@ -12,7 +12,7 @@ var numberOfRecievedInputs = 0;
 var bufferSize = 1;
 var canTick = false;
 
-let tickEvent = new $.Event('tick');
+let tickEvent = new $.Event('net-tick');
 let startEvent = new $.Event('start');
 
 var isHost = false;
@@ -162,13 +162,13 @@ function onRecieveInput(recievedInput){
 function start(){
 	sendInput();
 	$(document).trigger(startEvent);
-	gameTick();
+	netTick();
 }
 
 var lastLocalInput;
 var lastRemoteInput;
 
-function gameTick(){
+function netTick(){
 	var lowestBuffer = 0;
 	if(localInputBuffer.length < remoteInputBuffer.length){
 		lowestBuffer = localInputBuffer.length;
@@ -193,5 +193,5 @@ function gameTick(){
 		}
 	}
 	
-	setTimeout(gameTick, 1000/60);
+	setTimeout(netTick, 1000/60);
 }

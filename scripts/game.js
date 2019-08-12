@@ -5,8 +5,7 @@ var gameCanvas;
 
 $(document).ready(function() {
 	$(document).on('start', startGame);
-	$(document).on('tick', tick);
-	$(document).on('newInput', onNewInput);
+	$(document).on('net-tick', gameNetTick);
 });
 
 function startGame(){
@@ -30,7 +29,7 @@ function startGame(){
 }
 
 
-function tick(e){
+function gameNetTick(e){
 	if(isHost){
 		player1.playerInput = e.localInputThisTick;
 		player2.playerInput = e.remoteInputThisTick;
