@@ -74,10 +74,11 @@ function endNetTick(){
 }
 
 function gameTick(){
-	player1DrawX = (player1DrawX + (player1DrawX + player1.velX)) / 2;
-	player1DrawY = (player1DrawY + (player1DrawY + player1.velY)) / 2;
-	player2DrawX = (player2DrawX + (player2DrawX + player2.velX)) / 2;
-	player2DrawY = (player2DrawY + (player2DrawY + player2.velY)) / 2;
+	var extrapolationStrength = 0.2;
+	player1DrawX = (player1DrawX)*lerpAmount + (player1DrawX + player1.velX)*(1-extrapolationStrength);
+	player1DrawY = (player1DrawY)*lerpAmount + (player1DrawY + player1.velY)*(1-extrapolationStrength);
+	player2DrawX = (player2DrawX)*lerpAmount + (player2DrawX + player2.velX)*(1-extrapolationStrength);
+	player2DrawY = (player2DrawY)*lerpAmount + (player2DrawY + player2.velY)*(1-extrapolationStrength);
 
 	if(player1DrawX < 0)
 		player1DrawX = 0;
