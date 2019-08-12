@@ -9,10 +9,14 @@ $(document).ready(function() {
 });
 
 function startGame(){
-	gameWorld = new GameWorld(500, 500);
+	gameWorld = new GameWorld(1000, 500);
 	player1 = gameWorld.addPlayer(0, 0);
 	player2 = gameWorld.addPlayer(300, 0);
 	player2.direction = 'left';
+
+	gameWorld.addRectangle(200, 16, (gameWorld.width/2) - 100, 400);
+	gameWorld.addRectangle(200, 16, gameWorld.width - 200, 300);
+	gameWorld.addRectangle(200, 16, 0, 300);
 
 	gameCanvas = {
 		canvas : document.createElement('canvas'),
