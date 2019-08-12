@@ -3,16 +3,6 @@ var player1;
 var player2;
 var gameCanvas;
 
-var lastX1;
-var lastY1;
-var lastX2;
-var lastY2;
-
-var lastVX1;
-var lastVY1;
-var lastVX2;
-var lastVY2;
-
 $(document).ready(function() {
 	$(document).on('start', startGame);
 	$(document).on('tick', tick);
@@ -23,16 +13,6 @@ function startGame(){
 	gameWorld = new GameWorld(500, 500);
 	player1 = gameWorld.addPlayer(0, 0);
 	player2 = gameWorld.addPlayer(300, 0);
-
-	lastX1 = player1.x;
-	lastY1 = player1.y;
-	lastX2 = player2.x;
-	lastY2 = player2.y;
-
-	lastVX1 = 0;
-	lastVY1 = 0;
-	lastVX2 = 0;
-	lastVY2 = 0;
 
 	gameCanvas = {
 		canvas : document.createElement('canvas'),
@@ -49,21 +29,6 @@ function startGame(){
 	gameCanvas.init();
 }
 
-function onNewInput(){
-	player1.x = lastX1;
-	player1.y = lastY1;
-	player2.x = lastX2;
-	player2.y = lastY2;
-
-	player1.velX = lastVX1;
-	player1.velY = lastVY1;
-	player2.velX = lastVX2;
-	player2.velY = lastVY2;
-
-	player1.updateCollision();
-	player2.updateCollision();
-}
-
 
 function tick(e){
 	if(isHost){
@@ -76,19 +41,7 @@ function tick(e){
 	}
 
 	gameWorld.tick();
-
-	if(e.hasInput){
-		lastX1 = player1.x;
-		lastY1 = player1.y;
-		lastX2 = player2.x;
-		lastY2 = player2.y;
-
-		lastVX1 = player1.velX;
-		lastVY1 = player1.velY;
-		lastVX2 = player2.velX;
-		lastVY2 = player2.velY;
-	}
-
+	
 	draw();
 }
 
