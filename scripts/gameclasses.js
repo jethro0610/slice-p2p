@@ -64,6 +64,19 @@ class Rectangle {
 	right(){
 		return this.x + this.width;
 	}
+
+	isIntersecting(otherRectangle){
+		if(this.top() > otherRectangle.bottom())
+			return false;
+		if(this.bottom() < otherRectangle.top())
+			return false;
+		if(this.left() > otherRectangle.right())
+			return false;
+		if(this.right() < otherRectangle.left())
+			return false;
+
+		return true;
+	}
 }
 
 class Player {
@@ -101,6 +114,11 @@ class Player {
 		this.dashTimer = 0;
 		this.canDash = true;
 		this.dashing = false;
+
+		this.moveCooldown = 0;
+		this.moveCooldownLength = 10;
+		this.hitCooldown = 0;
+		this.hitCooldownLength = 20;
 	}
 
 	setFriction(newFriction){
@@ -184,6 +202,12 @@ class Player {
 
 	tick() {
 		this.updateCollision();
+
+		// Move cooldown
+		if(this.moveCooldown > 0){
+			this.moveCooldown -= 1;
+			this.playerInput = new Inputs();
+		}
 
 		if(this.hitBottom && this.playerInput.up)
 			this.jump();
@@ -274,6 +298,28 @@ class Player {
 		// Apply velocity to position
 		this.x += this.velX;
 		this.y += this.velY;
+
+		// Hit cooldown
+		if(this.hitCooldown > 0){
+			this.hitCooldown -= 1;
+		}
+
+		// Collision with other players
+		for (var i = 0; i < this.gameWorld.players.length; i++) {
+			var playerToCheck = this.gameWorld.players[i];
+			if(this.rectangle.isIntersecting(playerToCheck.rectangle) && this.dashing){
+				if(playerToCheck.hitCooldown <= 0){
+					if(this.direction == 'right'){
+						playerToCheck.velX = this.dashSpeed;
+					}
+					else{
+						playerToCheck.velX = -this.dashSpeed;
+					}
+					playerToCheck.hitCooldown = playerToCheck.hitCooldownLength;
+					playerToCheck.moveCooldown = playerToCheck.moveCooldownLength;
+				}
+			}
+		}
 
 		// Update rectangle position
 		this.rectangle.x = this.x;
