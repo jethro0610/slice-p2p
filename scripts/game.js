@@ -3,6 +3,8 @@ var player1;
 var player2;
 var gameCanvas;
 
+var gameScale = 0.5;
+
 $(document).ready(function() {
 	$(document).on('start', startGame);
 	$(document).on('net-tick', gameNetTick);
@@ -21,8 +23,8 @@ function startGame(){
 	gameCanvas = {
 		canvas : document.createElement('canvas'),
 		init : function() {
-			this.canvas.width = gameWorld.width;
-			this.canvas.height = gameWorld.height;
+			this.canvas.width = gameWorld.width * gameScale;
+			this.canvas.height = gameWorld.height * gameScale;
 			this.context = this.canvas.getContext('2d');
 			this.context.imageSmoothingEnabled = false;
 			document.body.appendChild(this.canvas);
@@ -55,7 +57,7 @@ function draw(){
 	// Draw all rectangles
 	for(var i = 0; i < gameWorld.rectangles.length; i++){
 	  	context.fillStyle = 'black';
-	  	context.fillRect(gameWorld.rectangles[i].x, gameWorld.rectangles[i].y, gameWorld.rectangles[i].width, gameWorld.rectangles[i].height);
+	  	context.fillRect(gameWorld.rectangles[i].x * gameScale, gameWorld.rectangles[i].y * gameScale, gameWorld.rectangles[i].width * gameScale, gameWorld.rectangles[i].height * gameScale);
 	}
 	// Draw all players
 	for(var i = 0; i < gameWorld.players.length; i++){
@@ -66,10 +68,10 @@ function draw(){
 	 	playerToDraw.drawTick();
 	 	//context.fillStyle = 'red';
 		//context.fillRect(gameWorld.players[i].drawX, gameWorld.players[i].drawY, gameWorld.players[i].rectangle.width, gameWorld.players[i].rectangle.height);
-		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, playerToDraw.drawX  - 48, playerToDraw.drawY, 32 * 4, 16 * 4);
+		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, (playerToDraw.drawX  - 48)  * gameScale, playerToDraw.drawY * gameScale, 32 * 4 * gameScale, 16 * 4 * gameScale);
 	}
 	context.font = '32px Arial';
-	context.fillText(player1.score.toString() + ' : ' + player2.score.toString(), 10, 50);
+	context.fillText(player1.score.toString() + ' : ' + player2.score.toString(), 10 * gameScale, 50 * gameScale);
 
 	setTimeout(draw, 1000/120);
 }
