@@ -17,8 +17,8 @@ $(document).ready(function() {
 function startGame(){
 	$('#menu').remove();
 	gameWorld = new GameWorld(1000, 500);
-	player1 = gameWorld.addPlayer(0, 0);
-	player2 = gameWorld.addPlayer(300, 0);
+	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0);
+	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0);
 	player2.direction = 'left';
 
 	gameWorld.addRectangle(200, 16, (gameWorld.width/2) - 100, 400);
@@ -72,8 +72,10 @@ function draw(){
 		if(playerToDraw.direction == 'left')
 			spriteYOffset = 17;
 	 	playerToDraw.drawTick();
-	 	//context.fillStyle = 'red';
-		//context.fillRect(gameWorld.players[i].drawX * gameScale, gameWorld.players[i].drawY * gameScale, gameWorld.players[i].rectangle.width * gameScale, gameWorld.players[i].rectangle.height * gameScale);
+	 	if(playerToDraw.slowMo){
+	 		context.fillStyle = 'red';
+			context.fillRect(gameWorld.players[i].drawX * gameScale, gameWorld.players[i].drawY * gameScale, gameWorld.players[i].rectangle.width * gameScale, gameWorld.players[i].rectangle.height * gameScale);
+		}
 		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, (playerToDraw.drawX  - 48)  * gameScale, (playerToDraw.drawY - 12) * gameScale, 32 * 4 * gameScale, 16 * 4 * gameScale);
 	}
 	context.font = '32px Arial';

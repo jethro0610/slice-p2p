@@ -28,6 +28,7 @@ class GameWorld {
 		this.height = height;
 		this.rectangles = [];
 		this.players = [];
+		this.resetToNeutral = false;
 	}
 
 	addPlayer(x, y) {
@@ -92,6 +93,8 @@ class Player {
 		this.gameWorld = gameWorld;
 		this.x = x;
 		this.y = y;
+		this.spawnX = x;
+		this.spawnY = y;
 		this.rectangle = new Rectangle(32, 52, this.x, this.y);
 
 		this.hitRight= false;
@@ -127,6 +130,9 @@ class Player {
 		this.canDash = true;
 		this.dashing = false;
 
+		this.hitDash = false;
+		this.hitByDash = false;
+
 		this.hitCooldown = 0;
 		this.hitCooldownLength = 20;
 
@@ -149,6 +155,10 @@ class Player {
 		this.canJump = true;
 
 		this.score = 0;
+
+		this.endRound = false;
+		this.endRoundTimer = 0;
+		this.endRoundLength = 120;
 	}
 
 	setFriction(newFriction){
@@ -178,6 +188,7 @@ class Player {
 		this.hitTop = false;
 		this.hitBottom = false;
 
+		// Drop through when holding down
 		var dropThrough = false;
 		if(this.inputToUse.down)
 			dropThrough = true;
@@ -247,7 +258,7 @@ class Player {
 		this.updateCollision();
 
 		// Input
-		if(!this.slowMo){
+		if(!this.slowMo && !this.endRound){
 			this.inputToUse = this.playerInput;
 		}
 		else{
@@ -285,7 +296,7 @@ class Player {
 		}
 		this.inputUpLastFrame = this.inputToUse.up;
 
-		// Apply gravity
+		// Gravity
 		if(!this.dashing && this.dashCooldown <= 0){
 			this.velY += this.gravitySpeed * this.timeDialation;
 			if(this.velY > this.maxGravity)
@@ -319,10 +330,10 @@ class Player {
 			else{
 				this.velX = -this.velX * this.pivotSpeed;
 			}
-			if(!this.dashing)
+			if(!this.dashing && this.canDash)
 				this.direction = 'left';
 		}
-		if(this.inputToUse.right){
+		if(this.inputToUse.right && this.canDash){
 			if(this.velX >= 0 || !this.hitBottom){
 				this.velX += accelerationToUse;
 			}
@@ -347,7 +358,15 @@ class Player {
 			this.dashTimer = 0;
 			this.velX = this.velX * 0.01;
 			this.velY = this.velY * 0.1;
-			this.dashCooldown = this.dashCooldownLength;
+			if(!this.endRound && !this.hitDash){
+				this.dashCooldown = this.dashCooldownLength;
+			}
+			else if(this.endRound){
+				this.dashCooldown = this.endRoundLength;
+			}
+			else{
+				this.dashCooldown = this.dashCooldownLength / 4;
+			}
 		}
 
 		if(this.dashCooldown > 0){
@@ -367,13 +386,12 @@ class Player {
 			}
 		}
 
-		if(this.hitBottom){
+		if(this.hitBottom && !this.endRound){
 			this.canDash = true;
 			this.dashing = false;
 			this.dashTimer = 0;
 			this.dashCooldown = 0;
 		}
-
 		this.inputDashLastFrame = this.inputToUse.dash;
 
 		// Stop y velocity on ground
@@ -381,8 +399,12 @@ class Player {
 			this.velY = 0;
 
 		// Hit cooldown
-		if(this.hitCooldown > 0){
-			this.hitCooldown -= 1 * this.timeDialation;
+		if(this.hitByDash){
+			this.hitCooldown += 1 * this.timeDialation;
+		}
+		if(this.hitCooldown >= this.hitCooldownLength){
+			this.hitCooldown = 0;
+			this.hitByDash = false;
 		}
 
 		// Interaction with other players
@@ -392,7 +414,7 @@ class Player {
 			if(playerToCheck != this){
 				// Slow-mo if this player is dashing
 				if(this.dashing == true && getDistance(this.centerX(), playerToCheck.centerX()) < 200 && getDistance(this.centerY(), playerToCheck.centerY()) < 64){
-					if(playerToCheck.hitCooldown <= 0){
+					if(!playerToCheck.hitByDash){
 						if(this.direction == 'right' && this.x - playerToCheck.x < 0 || this.direction == 'left' && this.x - playerToCheck.x > 0){
 							if(!playerToCheck.dashing || playerToCheck.direction != this.direction){
 								this.slowMo = true;
@@ -404,9 +426,9 @@ class Player {
 
 				// Slow-mo if other player is dashing
 				if(playerToCheck.dashing == true && getDistance(this.centerX(), playerToCheck.centerX()) < 200 && getDistance(this.centerY(), playerToCheck.centerY()) < 64){
-					if(this.hitCooldown <= 0){
+					if(!this.hitByDash){
 						if(playerToCheck.direction == 'right' && playerToCheck.x - this.x < 0 || playerToCheck.direction == 'left' && playerToCheck.x - this.x > 0){
-							if(!playerToCheck.dashing || this.direction != playerToCheck.direction){
+							if(!this.dashing || this.direction != playerToCheck.direction){
 								this.slowMo = true;
 							}
 						}
@@ -437,22 +459,45 @@ class Player {
 						this.dashing = false;
 						this.dashTimer = 0;
 					}
-					else if(playerToCheck.hitCooldown <= 0){
+					else if(!playerToCheck.hitByDash){
 						// Contact
 						this.score += 1;
+
+						var knockbackMult = 1;
+						if(gameWorld.resetToNeutral){
+							this.endRound = true;
+							playerToCheck.endRound = true;
+							knockbackMult = 2;
+						}
+
 						if(this.direction == 'right'){
-							playerToCheck.velX = this.dashSpeed;
+							playerToCheck.velX = this.dashSpeed * knockbackMult;
 						}
 						else{
-							playerToCheck.velX = -this.dashSpeed;
+							playerToCheck.velX = -this.dashSpeed * knockbackMult;
 						}
 						playerToCheck.velY = -playerToCheck.jumpStrength;
-						playerToCheck.hitCooldown = playerToCheck.hitCooldownLength;
+
+						this.hitDash = true;
+						playerToCheck.hitByDash = true;
+						playerToCheck.canDash = true;
+						playerToCheck.dashCooldown = 0;
 					}
 				}
 			}
 		}
 
+		// End round resetting
+		if(this.endRound){
+			if(this.gameWorld.resetToNeutral)
+				this.endRoundTimer += 1 * this.timeDialation;
+		}
+		if(this.endRoundTimer >= this.endRoundLength){
+			this.endRoundTimer = 0;
+			this.reset();
+		}
+
+		// Set speed for slow mo
 		if(this.slowMo){
 			this.timeDialation = this.slowMoSpeed;
 		}
@@ -531,16 +576,16 @@ class Player {
 					this.animState = 'midFall'
 				}
 			}
-			else{
-				this.animState = 'endDash';
-			}
 		}
 		
+		if(this.dashCooldown > 0)
+			this.animState = 'endDash';
+
 		if(this.hitBottom){
 			if(this.inputToUse.right && this.velX != 0 || this.inputToUse.left && this.velX != 0){
 				this.animState = 'run'
 			}
-			else{
+			else if(!this.dashCooldown){
 				this.animState = 'idle';
 			}
 		}
@@ -548,5 +593,31 @@ class Player {
 		if(this.dashing){
 			this.animState = 'dash';
 		}
+	}
+
+	reset(){
+		this.x = this.spawnX;
+		this.y = this.spawnY;
+		this.velX = 0;
+		this.velY = 0;
+
+		this.drawX = this.x;
+		this.drawY = this.y;
+
+		this.canJump = true;
+		this.canDoubleJump = true;
+		this.dashing = false;
+		this.dashTimer = 0;
+
+		this.dashCooldown = 0;
+		this.canDash = true;
+
+		this.hitDash = false;
+		this.hitByDash = false;
+		this.hitCooldown = 0;
+
+		this.slowMo = false;
+
+		this.endRound = false;
 	}
 }
