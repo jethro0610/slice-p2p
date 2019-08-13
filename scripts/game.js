@@ -17,8 +17,8 @@ $(document).ready(function() {
 function startGame(){
 	$('#menu').remove();
 	gameWorld = new GameWorld(1000, 500);
-	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0);
-	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0);
+	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0, 'red');
+	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0, 'blue');
 	player2.direction = 'left';
 
 	gameWorld.addRectangle(200, 16, (gameWorld.width/2) - 100, 400);
@@ -75,9 +75,21 @@ function draw(){
 	 	//context.fillStyle = 'red';
 		//context.fillRect(gameWorld.players[i].drawX * gameScale, gameWorld.players[i].drawY * gameScale, gameWorld.players[i].rectangle.width * gameScale, gameWorld.players[i].rectangle.height * gameScale);
 		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, (playerToDraw.drawX  - 48)  * gameScale, (playerToDraw.drawY - 12) * gameScale, 32 * 4 * gameScale, 16 * 4 * gameScale);
+
+		drawTriangle((playerToDraw.drawX + 16) * gameScale, (playerToDraw.drawY - 20) * gameScale, 10, 10, playerToDraw.color, context);
 	}
 	context.font = '32px Arial';
 	context.fillText(player1.score.toString() + ' : ' + player2.score.toString(), 10 * gameScale, 50 * gameScale);
 
 	setTimeout(draw, 1000/120);
+}
+
+function drawTriangle(x, y, width, height, color, context){
+	context.fillStyle = color;
+	context.beginPath();
+	context.moveTo(x, y);
+	context.lineTo(x + width, y - height);
+	context.lineTo(x - width, y - height);
+	context.fill();
+	context.fillStyle = 'black';
 }

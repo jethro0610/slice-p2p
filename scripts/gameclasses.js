@@ -31,8 +31,8 @@ class GameWorld {
 		this.resetToNeutral = true;
 	}
 
-	addPlayer(x, y) {
-		var newPlayer = new Player(x, y, this);
+	addPlayer(x, y, color) {
+		var newPlayer = new Player(x, y, color, this);
 		this.players.push(newPlayer);
 		return newPlayer
 	}
@@ -89,13 +89,14 @@ class Rectangle {
 }
 
 class Player {
-	constructor(x, y, gameWorld) {
+	constructor(x, y, color, gameWorld) {
 		this.gameWorld = gameWorld;
 		this.x = x;
 		this.y = y;
 		this.spawnX = x;
 		this.spawnY = y;
 		this.rectangle = new Rectangle(32, 52, this.x, this.y);
+		this.color = color;
 
 		this.hitRight= false;
 		this.hitLeft = false;
