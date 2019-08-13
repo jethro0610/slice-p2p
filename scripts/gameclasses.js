@@ -116,6 +116,7 @@ class Player {
 
 		this.playerInput = new Inputs();
 		this.inputUpLastFrame = false;
+		this.inputDashLastFrame = false;
 
 		this.dashSpeed = 30;
 		this.dashLength = 7;
@@ -140,7 +141,8 @@ class Player {
 		this.spriteFrame = 0;
 
 		this.runStateTick = 0;
-		this.canDoubleJump = true;;
+		this.canDoubleJump = true;
+		this.canJump = true;
 	}
 
 	setFriction(newFriction){
@@ -170,6 +172,12 @@ class Player {
 		this.hitTop = false;
 		this.hitBottom = false;
 
+		var dropThrough = false;
+		if(this.playerInput.down)
+			dropThrough = true;
+		if(this.dashing)
+			dropThrough = false;
+
 		// Detect collision with rectangles
 		for (var i = 0; i < this.gameWorld.rectangles.length; i++) {
 			var rectangleToCheck = this.gameWorld.rectangles[i];
@@ -187,7 +195,7 @@ class Player {
 			}
 			// If player is within horizontal bounds of a rectangle
 			if(this.rectangle.right() >= rectangleToCheck.left() && this.rectangle.left() <= rectangleToCheck.right()){
-				if(this.rectangle.bottom() >= rectangleToCheck.top() && this.velY >= 0 && this.rectangle.top() <= rectangleToCheck.top()){
+				if(this.rectangle.bottom() >= rectangleToCheck.top() && !dropThrough && this.velY >= 0 && this.rectangle.top() <= rectangleToCheck.top()){
 					this.hitBottom = true;
 					this.y = rectangleToCheck.top() - this.rectangle.height;
 				}
@@ -214,7 +222,7 @@ class Player {
 		if(this.rectangle.top() <= 0){
 			this.hitTop = true;
 			this.y = 0;
-			this.velY = 0;
+			//this.velY = 0;
 		}
 		if(this.rectangle.bottom() >= gameWorld.height){
 			this.hitBottom = true;
@@ -238,19 +246,30 @@ class Player {
 
 		// Jumping
 		if(this.playerInput.up && !this.dashing){
-			if(this.hitBottom){
+			if(this.canJump){
+				this.canJump = false;
 				this.jump();
+				if(!this.hitBottom){
+					if(this.playerInput.left && !this.playerInput.right){
+						if(this.velX > 0)
+							this.velX = -this.velX * 1.5;
+					}
+					else if(this.playerInput.right && !this.playerInput.left){
+						if(this.velX < 0)
+							this.velX = -this.velX * 1.5;
+					}
+				}
 			}
 			else if(this.canDoubleJump && !this.inputUpLastFrame && this.canDash){
 				this.canDoubleJump = false;
 				this.jump();
 				if(this.playerInput.left && !this.playerInput.right){
 					if(this.velX > 0)
-						this.velX = -this.velX;
+						this.velX = -this.velX * 1.5;
 				}
 				else if(this.playerInput.right && !this.playerInput.left){
 					if(this.velX < 0)
-						this.velX = -this.velX;
+						this.velX = -this.velX * 1.5;
 				}
 			}
 		}
@@ -269,6 +288,7 @@ class Player {
 		var accelerationToUse;
 		if(this.hitBottom){
 			this.canDoubleJump = true;
+			this.canJump = true;
 			frictionToUse = this.groundFriction * this.timeDialation;
 			accelerationToUse = this.groundAcc() * this.timeDialation;
 		}
@@ -301,7 +321,7 @@ class Player {
 		}
 
 		// Dashing
-		if(this.playerInput.dash && this.canDash && !this.hitBottom){
+		if(this.playerInput.dash && !this.inputDashLastFrame && this.canDash && !this.hitBottom){
 			this.dashing = true;
 			this.canDash = false;
 			this.velY *= 0.4;
@@ -328,6 +348,8 @@ class Player {
 			this.dashing = false;
 			this.dashTimer = 0;
 		}
+
+		this.inputDashLastFrame = this.playerInput.dash;
 
 		// Stop x velocity on walls
 		//if(this.hitRight && this.velX > 0)
@@ -432,7 +454,7 @@ class Player {
 		if(this.drawX + this.rectangle.width > this.gameWorld.width)
 			this.drawX = this.gameWorld.width - this.rectangle.width;
 		if(this.drawY < 0)
-			this.drawX = 0;
+			this.drawy = 0;
 		if(this.drawY + this.rectangle.height > this.gameWorld.height)
 			this.drawY = this.gameWorld.height - this.rectangle.height;
 
