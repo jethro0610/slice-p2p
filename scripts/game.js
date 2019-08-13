@@ -11,6 +11,7 @@ $(document).ready(function() {
 });
 
 function startGame(){
+	$('#menu').remove();
 	gameWorld = new GameWorld(1000, 500);
 	player1 = gameWorld.addPlayer(0, 0);
 	player2 = gameWorld.addPlayer(300, 0);
@@ -23,6 +24,7 @@ function startGame(){
 	gameCanvas = {
 		canvas : document.createElement('canvas'),
 		init : function() {
+			this.canvas.setAttribute('id', 'gameWindow');
 			this.canvas.width = gameWorld.width * gameScale;
 			this.canvas.height = gameWorld.height * gameScale;
 			this.context = this.canvas.getContext('2d');

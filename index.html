@@ -7,11 +7,35 @@
 		<script src='/scripts/networking.js'></script>
 		<script src='/scripts/gameclasses.js'></script>
 		<script src="/scripts/game.js"></script>
+
+		<style>
+			html, body{
+				margin: 0;
+				padding: 0;
+				width: 100%;
+				height: 100%;
+			}
+			#menu {
+				text-align: center;
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+			}
+			#gameWindow {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);			
+			}
+		</style>
 	</head>
 	<body>
-		Your ID: <span id='hostCode'></span>
-		<p></p>
-		<button id='joinButton'> Join </button>
-		<input id='joinInput'>
+		<div id='menu'>
+			Your ID: <span id='hostCode'></span>
+			<p></p>
+			<button id='joinButton'> Join </button>
+			<input id='joinInput'>
+		</div>
 	</body>
 </html>
