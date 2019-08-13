@@ -115,6 +115,7 @@ class Player {
 		this.direction = 'right';
 
 		this.playerInput = new Inputs();
+		this.inputToUse = new Inputs();
 		this.inputUpLastFrame = false;
 		this.inputDashLastFrame = false;
 
@@ -178,7 +179,7 @@ class Player {
 		this.hitBottom = false;
 
 		var dropThrough = false;
-		if(this.playerInput.down)
+		if(this.inputToUse.down)
 			dropThrough = true;
 		if(this.dashing)
 			dropThrough = false;
@@ -230,9 +231,11 @@ class Player {
 			//this.velY = 0;
 		}
 		if(this.rectangle.bottom() >= gameWorld.height){
-			this.hitBottom = true;
-			this.y = gameWorld.height - this.rectangle.height;
-			this.velY = 0;
+			if(this.velY >= 0){
+				this.hitBottom = true;
+				this.y = gameWorld.height - this.rectangle.height;
+				this.velY = 0;
+			}
 		}
 	}
 
@@ -244,35 +247,35 @@ class Player {
 		this.updateCollision();
 
 		// Jumping
-		if(this.playerInput.up && !this.dashing){
-			if(this.canJump){
+		if(this.inputToUse.up && !this.dashing){
+			if(this.canJump && !this.slowMo && this.canDash && this.dashCooldown >= 0){
 				this.canJump = false;
 				this.jump();
 				if(!this.hitBottom){
-					if(this.playerInput.left && !this.playerInput.right){
+					if(this.inputToUse.left && !this.inputToUse.right){
 						if(this.velX > 0)
 							this.velX = -this.velX * 1.5;
 					}
-					else if(this.playerInput.right && !this.playerInput.left){
+					else if(this.inputToUse.right && !this.inputToUse.left){
 						if(this.velX < 0)
 							this.velX = -this.velX * 1.5;
 					}
 				}
 			}
-			else if(this.canDoubleJump && !this.inputUpLastFrame && this.canDash){
+			else if(this.canDoubleJump && !this.inputUpLastFrame && this.canDash && this.dashCooldown >= 0){
 				this.canDoubleJump = false;
 				this.jump();
-				if(this.playerInput.left && !this.playerInput.right){
+				if(this.inputToUse.left && !this.inputToUse.right){
 					if(this.velX > 0)
 						this.velX = -this.velX * 1.5;
 				}
-				else if(this.playerInput.right && !this.playerInput.left){
+				else if(this.inputToUse.right && !this.inputToUse.left){
 					if(this.velX < 0)
 						this.velX = -this.velX * 1.5;
 				}
 			}
 		}
-		this.inputUpLastFrame = this.playerInput.up;
+		this.inputUpLastFrame = this.inputToUse.up;
 
 		// Apply gravity
 		if(!this.dashing && this.dashCooldown <= 0){
@@ -301,7 +304,7 @@ class Player {
 		// Apply friction
 		this.velX -= this.velX * frictionToUse;
 		// Move from input
-		if(this.playerInput.left){
+		if(this.inputToUse.left){
 			if(this.velX <= 0 || !this.hitBottom){
 				this.velX -= accelerationToUse;
 			}
@@ -311,7 +314,7 @@ class Player {
 			if(!this.dashing)
 				this.direction = 'left';
 		}
-		if(this.playerInput.right){
+		if(this.inputToUse.right){
 			if(this.velX >= 0 || !this.hitBottom){
 				this.velX += accelerationToUse;
 			}
@@ -323,10 +326,12 @@ class Player {
 		}
 
 		// Dashing
-		if(this.playerInput.dash && !this.inputDashLastFrame && this.canDash && !this.hitBottom && !this.slowMo){
+		if(this.inputToUse.dash && !this.inputDashLastFrame && this.canDash && !this.hitBottom){
 			this.dashing = true;
 			this.canDash = false;
 			this.velY *= 0.4;
+			if(this.inputToUse.down)
+				this.velY += this.jumpStrength * 0.4;
 		}
 
 		if(this.dashTimer >= this.dashLength){
@@ -339,8 +344,6 @@ class Player {
 
 		if(this.dashCooldown > 0){
 			this.dashCooldown -= 1 * this.timeDialation;
-			//this.velX *= 0.8 * this.timeDialation;
-			//this.velY *= 0.8 * this.timeDialation;
 		}
 		else{
 			this.dashCooldown = 0;
@@ -363,7 +366,7 @@ class Player {
 			this.dashCooldown = 0;
 		}
 
-		this.inputDashLastFrame = this.playerInput.dash;
+		this.inputDashLastFrame = this.inputToUse.dash;
 
 		// Stop y velocity on ground
 		if(this.hitBottom && this.velY > 0)
@@ -435,6 +438,7 @@ class Player {
 						else{
 							playerToCheck.velX = -this.dashSpeed;
 						}
+						playerToCheck.velY = -playerToCheck.jumpStrength;
 						playerToCheck.hitCooldown = playerToCheck.hitCooldownLength;
 					}
 				}
@@ -525,7 +529,7 @@ class Player {
 		}
 		
 		if(this.hitBottom){
-			if(this.playerInput.right && this.velX != 0 || this.playerInput.left && this.velX != 0){
+			if(this.inputToUse.right && this.velX != 0 || this.inputToUse.left && this.velX != 0){
 				this.animState = 'run'
 			}
 			else{
