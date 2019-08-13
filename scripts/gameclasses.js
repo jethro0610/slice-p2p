@@ -31,8 +31,8 @@ class GameWorld {
 		this.resetToNeutral = true;
 	}
 
-	addPlayer(x, y, color) {
-		var newPlayer = new Player(x, y, color, this);
+	addPlayer(x, y, spawnDirection, color) {
+		var newPlayer = new Player(x, y, spawnDirection, color, this);
 		this.players.push(newPlayer);
 		return newPlayer
 	}
@@ -89,7 +89,7 @@ class Rectangle {
 }
 
 class Player {
-	constructor(x, y, color, gameWorld) {
+	constructor(x, y, spawnDirection, color, gameWorld) {
 		this.gameWorld = gameWorld;
 		this.x = x;
 		this.y = y;
@@ -97,6 +97,7 @@ class Player {
 		this.spawnY = y;
 		this.rectangle = new Rectangle(32, 52, this.x, this.y);
 		this.color = color;
+		this.firstHitBottom = false;
 
 		this.hitRight= false;
 		this.hitLeft = false;
@@ -116,7 +117,8 @@ class Player {
 		this.velX = 0;
 		this.velY = 0;
 
-		this.direction = 'right';
+		this.spawnDirection = spawnDirection
+		this.direction = spawnDirection;
 
 		this.playerInput = new Inputs();
 		this.inputToUse = new Inputs();
@@ -259,7 +261,7 @@ class Player {
 		this.updateCollision();
 
 		// Input
-		if(!this.slowMo && !this.endRound){
+		if(!this.slowMo && !this.endRound && this.firstHitBottom){
 			this.inputToUse = this.playerInput;
 		}
 		else{
@@ -308,6 +310,7 @@ class Player {
 		var frictionToUse;
 		var accelerationToUse;
 		if(this.hitBottom){
+			this.firstHitBottom = true;
 			this.canDoubleJump = true;
 			this.canJump = true;
 			frictionToUse = this.groundFriction * this.timeDialation;
@@ -601,6 +604,8 @@ class Player {
 		this.y = this.spawnY;
 		this.velX = 0;
 		this.velY = 0;
+		this.direction = this.spawnDirection;
+		this.firstHitBottom = false;
 
 		this.drawX = this.x;
 		this.drawY = this.y;

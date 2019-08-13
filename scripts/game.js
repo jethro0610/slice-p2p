@@ -17,9 +17,8 @@ $(document).ready(function() {
 function startGame(){
 	$('#menu').remove();
 	gameWorld = new GameWorld(1000, 500);
-	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0, 'red');
-	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0, 'blue');
-	player2.direction = 'left';
+	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0, 'right', 'red');
+	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0, 'left', 'blue');
 
 	gameWorld.addRectangle(200, 16, (gameWorld.width/2) - 100, 400);
 	gameWorld.addRectangle(200, 16, gameWorld.width - 200, 300);
