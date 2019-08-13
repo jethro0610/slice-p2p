@@ -72,10 +72,8 @@ function draw(){
 		if(playerToDraw.direction == 'left')
 			spriteYOffset = 17;
 	 	playerToDraw.drawTick();
-	 	if(playerToDraw.slowMo){
-	 		context.fillStyle = 'red';
-			context.fillRect(gameWorld.players[i].drawX * gameScale, gameWorld.players[i].drawY * gameScale, gameWorld.players[i].rectangle.width * gameScale, gameWorld.players[i].rectangle.height * gameScale);
-		}
+	 	//context.fillStyle = 'red';
+		//context.fillRect(gameWorld.players[i].drawX * gameScale, gameWorld.players[i].drawY * gameScale, gameWorld.players[i].rectangle.width * gameScale, gameWorld.players[i].rectangle.height * gameScale);
 		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, (playerToDraw.drawX  - 48)  * gameScale, (playerToDraw.drawY - 12) * gameScale, 32 * 4 * gameScale, 16 * 4 * gameScale);
 	}
 	context.font = '32px Arial';

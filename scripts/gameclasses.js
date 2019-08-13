@@ -28,7 +28,7 @@ class GameWorld {
 		this.height = height;
 		this.rectangles = [];
 		this.players = [];
-		this.resetToNeutral = false;
+		this.resetToNeutral = true;
 	}
 
 	addPlayer(x, y) {
@@ -294,7 +294,7 @@ class Player {
 				}
 			}
 		}
-		this.inputUpLastFrame = this.inputToUse.up;
+		this.inputUpLastFrame = this.playerInput.up;
 
 		// Gravity
 		if(!this.dashing && this.dashCooldown <= 0){
@@ -392,7 +392,7 @@ class Player {
 			this.dashTimer = 0;
 			this.dashCooldown = 0;
 		}
-		this.inputDashLastFrame = this.inputToUse.dash;
+		this.inputDashLastFrame = this.playerInput.dash;
 
 		// Stop y velocity on ground
 		if(this.hitBottom && this.velY > 0)
@@ -438,7 +438,7 @@ class Player {
 				// Dash contact
 				if(this.rectangle.isIntersecting(playerToCheck.rectangle) && this.dashing){
 					if(playerToCheck.dashing){
-						// Clashes
+						// Clashes (have to do it on both players due to tick order)
 						if(playerToCheck.direction == 'right'){
 							playerToCheck.velX = -playerToCheck.dashSpeed;
 						}
@@ -448,7 +448,7 @@ class Player {
 						playerToCheck.canDash = true;
 						playerToCheck.dashing = false;
 						playerToCheck.dashTimer = 0;
-						
+
 						if(this.direction == 'right'){
 							this.velX = -this.dashSpeed;
 						}
