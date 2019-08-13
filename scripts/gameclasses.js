@@ -120,15 +120,18 @@ class Player {
 
 		this.dashSpeed = 30;
 		this.dashLength = 7;
+		this.dashCooldown = 0;
+		this.dashCooldownLength = 40;
 		this.dashTimer = 0;
 		this.canDash = true;
 		this.dashing = false;
 
-		this.moveCooldown = 0;
-		this.moveCooldownLength = 10;
 		this.hitCooldown = 0;
 		this.hitCooldownLength = 20;
 
+		this.slowMo = false;
+		this.normalSpeed = 0.5;
+		this.slowMoSpeed = 0.1 * this.normalSpeed;
 		this.timeDialation = 0.5;
 
 		this.drawX = this.x;
@@ -240,12 +243,6 @@ class Player {
 	tick() {
 		this.updateCollision();
 
-		// Move cooldown
-		if(this.moveCooldown > 0){
-			this.moveCooldown -= 1 * this.timeDialation;
-			this.playerInput = new Inputs();
-		}
-
 		// Jumping
 		if(this.playerInput.up && !this.dashing){
 			if(this.canJump){
@@ -275,18 +272,17 @@ class Player {
 				}
 			}
 		}
-
 		this.inputUpLastFrame = this.playerInput.up;
 
 		// Apply gravity
-		if(!this.dashing){
+		if(!this.dashing && this.dashCooldown <= 0){
 			this.velY += this.gravitySpeed * this.timeDialation;
 			if(this.velY > this.maxGravity)
 				this.velY = this.maxGravity;
 		}
 
 		// Movement
-		var frictionToUse;;
+		var frictionToUse;
 		var accelerationToUse;
 		if(this.hitBottom){
 			this.canDoubleJump = true;
@@ -297,6 +293,10 @@ class Player {
 		else{
 			frictionToUse = this.airFriction * this.timeDialation;
 			accelerationToUse = this.airAcc() * this.timeDialation;
+		}
+		if(this.dashing || this.dashCooldown > 0){
+			frictionToUse = 0;
+			accelerationToUse = 0;
 		}
 		// Apply friction
 		this.velX -= this.velX * frictionToUse;
@@ -323,7 +323,7 @@ class Player {
 		}
 
 		// Dashing
-		if(this.playerInput.dash && !this.inputDashLastFrame && this.canDash && !this.hitBottom){
+		if(this.playerInput.dash && !this.inputDashLastFrame && this.canDash && !this.hitBottom && !this.slowMo){
 			this.dashing = true;
 			this.canDash = false;
 			this.velY *= 0.4;
@@ -331,8 +331,19 @@ class Player {
 
 		if(this.dashTimer >= this.dashLength){
 			this.dashing = false;
-			this.velX = 0;
 			this.dashTimer = 0;
+			this.velX = this.velX * 0.01;
+			this.velY = this.velY * 0.1;
+			this.dashCooldown = this.dashCooldownLength;
+		}
+
+		if(this.dashCooldown > 0){
+			this.dashCooldown -= 1 * this.timeDialation;
+			//this.velX *= 0.8 * this.timeDialation;
+			//this.velY *= 0.8 * this.timeDialation;
+		}
+		else{
+			this.dashCooldown = 0;
 		}
 
 		if(this.dashing){
@@ -349,15 +360,10 @@ class Player {
 			this.canDash = true;
 			this.dashing = false;
 			this.dashTimer = 0;
+			this.dashCooldown = 0;
 		}
 
 		this.inputDashLastFrame = this.playerInput.dash;
-
-		// Stop x velocity on walls
-		//if(this.hitRight && this.velX > 0)
-			//this.velX = 0;
-		//if(this.hitLeft && this.velX < 0)
-			//this.velX = 0;
 
 		// Stop y velocity on ground
 		if(this.hitBottom && this.velY > 0)
@@ -368,29 +374,38 @@ class Player {
 			this.hitCooldown -= 1 * this.timeDialation;
 		}
 
-		var slowMo = false;
 		// Interaction with other players
+		this.slowMo = false;
 		for (var i = 0; i < this.gameWorld.players.length; i++) {
 			var playerToCheck = this.gameWorld.players[i];
 			if(playerToCheck != this){
 				// Slow-mo if this player is dashing
 				if(this.dashing == true && getDistance(this.centerX(), playerToCheck.centerX()) < 200 && getDistance(this.centerY(), playerToCheck.centerY()) < 64){
 					if(playerToCheck.hitCooldown <= 0){
-						slowMo = true;
-						this.dashTimer -= 0.5 * this.timeDialation;
+						if(this.direction == 'right' && this.x - playerToCheck.x < 0 || this.direction == 'left' && this.x - playerToCheck.x > 0){
+							if(!playerToCheck.dashing || playerToCheck.direction != this.direction){
+								this.slowMo = true;
+								this.dashTimer -= 0.5 * this.timeDialation;
+							}
+						}
 					}
 				}
 
 				// Slow-mo if other player is dashing
 				if(playerToCheck.dashing == true && getDistance(this.centerX(), playerToCheck.centerX()) < 200 && getDistance(this.centerY(), playerToCheck.centerY()) < 64){
 					if(this.hitCooldown <= 0){
-						slowMo = true;
+						if(playerToCheck.direction == 'right' && playerToCheck.x - this.x < 0 || playerToCheck.direction == 'left' && playerToCheck.x - this.x > 0){
+							if(!playerToCheck.dashing || this.direction != playerToCheck.direction){
+								this.slowMo = true;
+							}
+						}
 					}
 				}
 
 				// Dash contact
 				if(this.rectangle.isIntersecting(playerToCheck.rectangle) && this.dashing){
 					if(playerToCheck.dashing){
+						// Clashes
 						if(playerToCheck.direction == 'right'){
 							playerToCheck.velX = -playerToCheck.dashSpeed;
 						}
@@ -400,7 +415,6 @@ class Player {
 						playerToCheck.canDash = true;
 						playerToCheck.dashing = false;
 						playerToCheck.dashTimer = 0;
-						playerToCheck.moveCooldown = 5;
 						
 						if(this.direction == 'right'){
 							this.velX = -this.dashSpeed;
@@ -411,9 +425,9 @@ class Player {
 						this.canDash = true;
 						this.dashing = false;
 						this.dashTimer = 0;
-						this.moveCooldown = 5;
 					}
 					else if(playerToCheck.hitCooldown <= 0){
+						// Contact
 						this.score += 1;
 						if(this.direction == 'right'){
 							playerToCheck.velX = this.dashSpeed;
@@ -422,17 +436,16 @@ class Player {
 							playerToCheck.velX = -this.dashSpeed;
 						}
 						playerToCheck.hitCooldown = playerToCheck.hitCooldownLength;
-						playerToCheck.moveCooldown = playerToCheck.moveCooldownLength;
 					}
 				}
 			}
 		}
 
-		if(slowMo){
-			this.timeDialation = 0.05 / 2;
+		if(this.slowMo){
+			this.timeDialation = this.slowMoSpeed;
 		}
 		else{
-			this.timeDialation = 0.5;
+			this.timeDialation = this.normalSpeed;
 		}
 
 		// Apply velocity to position
