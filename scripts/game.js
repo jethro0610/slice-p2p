@@ -5,6 +5,10 @@ var gameCanvas;
 
 var gameScale = 0.5;
 
+window.onkeydown = function(e) { 
+  return !(e.keyCode == 32 && e.target == document.body);
+}; 
+
 $(document).ready(function() {
 	$(document).on('start', startGame);
 	$(document).on('net-tick', gameNetTick);
