@@ -118,7 +118,7 @@ class Player {
 		this.inputUpLastFrame = false;
 
 		this.dashSpeed = 30;
-		this.dashLength = 5;
+		this.dashLength = 7;
 		this.dashTimer = 0;
 		this.canDash = true;
 		this.dashing = false;
@@ -140,6 +140,7 @@ class Player {
 		this.spriteFrame = 0;
 
 		this.runStateTick = 0;
+		this.canDoubleJump = true;;
 	}
 
 	setFriction(newFriction){
@@ -235,8 +236,24 @@ class Player {
 			this.playerInput = new Inputs();
 		}
 
-		if(this.hitBottom && this.playerInput.up)
-			this.jump();
+		// Jumping
+		if(this.playerInput.up && !this.dashing){
+			if(this.hitBottom){
+				this.jump();
+			}
+			else if(this.canDoubleJump && !this.inputUpLastFrame && this.canDash){
+				this.canDoubleJump = false;
+				this.jump();
+				if(this.playerInput.left && !this.playerInput.right){
+					if(this.velX > 0)
+						this.velX = -this.velX;
+				}
+				else if(this.playerInput.right && !this.playerInput.left){
+					if(this.velX < 0)
+						this.velX = -this.velX;
+				}
+			}
+		}
 
 		this.inputUpLastFrame = this.playerInput.up;
 
@@ -251,6 +268,7 @@ class Player {
 		var frictionToUse;;
 		var accelerationToUse;
 		if(this.hitBottom){
+			this.canDoubleJump = true;
 			frictionToUse = this.groundFriction * this.timeDialation;
 			accelerationToUse = this.groundAcc() * this.timeDialation;
 		}
@@ -286,13 +304,12 @@ class Player {
 		if(this.playerInput.dash && this.canDash && !this.hitBottom){
 			this.dashing = true;
 			this.canDash = false;
-			if(this.velY < 0)
-				this.velY *= 0.5;
+			this.velY *= 0.4;
 		}
 
 		if(this.dashTimer >= this.dashLength){
 			this.dashing = false;
-			this.velX *= 0.2;
+			this.velX = 0;
 			this.dashTimer = 0;
 		}
 
