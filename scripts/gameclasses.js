@@ -92,7 +92,7 @@ class Player {
 		this.gameWorld = gameWorld;
 		this.x = x;
 		this.y = y;
-		this.rectangle = new Rectangle(32, 64, this.x, this.y);
+		this.rectangle = new Rectangle(32, 52, this.x, this.y);
 
 		this.hitRight= false;
 		this.hitLeft = false;
@@ -245,6 +245,14 @@ class Player {
 
 	tick() {
 		this.updateCollision();
+
+		// Input
+		if(!this.slowMo){
+			this.inputToUse = this.playerInput;
+		}
+		else{
+			this.inputToUse = new Inputs();
+		}
 
 		// Jumping
 		if(this.inputToUse.up && !this.dashing){
