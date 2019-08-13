@@ -143,6 +143,8 @@ class Player {
 		this.runStateTick = 0;
 		this.canDoubleJump = true;
 		this.canJump = true;
+
+		this.score = 0;
 	}
 
 	setFriction(newFriction){
@@ -412,6 +414,7 @@ class Player {
 						this.moveCooldown = 5;
 					}
 					else if(playerToCheck.hitCooldown <= 0){
+						this.score += 1;
 						if(this.direction == 'right'){
 							playerToCheck.velX = this.dashSpeed;
 						}
