@@ -4,6 +4,7 @@ function requestClientID(){
 	matchmakingServer.emit('requestClientID');
 }
 
-matchmakingServer.on('sendClientID', function(){
-	console.log('recieved client id');
+matchmakingServer.on('sendClientID', function(newClientID){
+	console.log('recieved client id: ' + newClientID.toString());
+	setLocalClient(new Peer(newClientID, {host: 'localhost', port: 3000, path:'/api'}));
 });

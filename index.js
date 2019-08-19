@@ -1,4 +1,5 @@
 var express = require('express');
+var uuid = require('uuid');
 
 var app = express();
 var http = require('http').createServer(app);
@@ -27,6 +28,7 @@ io.on('connection', function(socket){
 	
 	socket.on('requestClientID', function(){
 		console.log('client id requested');
-		socket.emit('sendClientID');
+		var generatedID = uuid.v4();
+		socket.emit('sendClientID', generatedID);
 	});
 });
