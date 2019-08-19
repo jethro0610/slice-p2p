@@ -70,14 +70,15 @@ class PeerMessage {
 }
 
 $(document).ready(function() {
-	setLocalClient(new Peer());
-
+	//setLocalClient(new Peer());
+	/*
 	$('#joinButton').click(function (){
 		if(typeof connection == 'undefined' && typeof localClient != undefined){
 			setConnection(localClient.connect($('#joinInput').val()));
 			console.log('Connected to client');
 		}
 	});
+	*/
 });
 
 // Put local client bindings here
