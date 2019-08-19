@@ -1,0 +1,24 @@
+{
+  "name": "slice-p2p",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jethro0610/slice-p2p.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jethro0610/slice-p2p/issues"
+  },
+  "homepage": "https://github.com/jethro0610/slice-p2p#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "peer": "^0.2.10",
+    "socket.io": "^2.2.0"
+  }
+}
