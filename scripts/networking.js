@@ -108,6 +108,7 @@ function setConnection(newConnection){
 
 	connection.on('error', function(err){
 		console.log("Remote client error: " + err.type);
+		connection = null;
 	});
 
 	connection.on('data', function(data){
