@@ -1,3 +1,5 @@
+var hasStarted = false;
+
 var gameWorld;
 var player1;
 var player2;
@@ -12,6 +14,7 @@ window.onkeydown = function(e) {
 $(document).ready(function() {
 	$(document).on('start', startGame);
 	$(document).on('net-tick', gameNetTick);
+	$(document).on('reset', onReset);
 });
 
 function startGame(){
@@ -38,6 +41,9 @@ function startGame(){
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 	}
+
+	hasStarted = true;
+
 	gameCanvas.init();
 	draw();
 }
@@ -56,6 +62,9 @@ function gameNetTick(e){
 }
 
 function draw(){
+	if(!hasStarted)
+		return;
+
 	gameCanvas.clear();
 
 	context = gameCanvas.context;
@@ -91,4 +100,9 @@ function drawTriangle(x, y, width, height, color, context){
 	context.lineTo(x - width, y - height);
 	context.fill();
 	context.fillStyle = 'black';
+}
+
+function onReset(){
+	hasStarted = false;
+	$('#gameWindow').remove();
 }

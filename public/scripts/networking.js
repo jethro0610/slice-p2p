@@ -1,10 +1,12 @@
-var localClient;
-var connection;
+var isTicking = false;
+
+var localClient = null;
+var connection = null;
 
 var currentInput = new Inputs();
 
-let localInputBuffer = [];
-let remoteInputBuffer = [];
+var localInputBuffer = [];
+var remoteInputBuffer = [];
 
 var numberOfSentInputs = 0;
 var numberOfRecievedInputs = 0;
@@ -12,12 +14,16 @@ var numberOfRecievedInputs = 0;
 var bufferSize = 1;
 var canTick = false;
 
-let startTickEvent = new $.Event('start-tick');
-let tickEvent = new $.Event('net-tick');
-let endTickEvent = new $.Event('end-tick');
-let startEvent = new $.Event('start');
+var startTickEvent = new $.Event('start-tick');
+var tickEvent = new $.Event('net-tick');
+var endTickEvent = new $.Event('end-tick');
+var startEvent = new $.Event('start');
+var resetEvent = new $.Event('reset');
 
 var isHost = false;
+
+var timeoutTimer;
+var maxTimeout = 120 * 5;
 
 function Inputs() {
 	this.up = false
@@ -70,10 +76,8 @@ class PeerMessage {
 }
 
 $(document).ready(function() {
-	//setLocalClient(new Peer());
-	
 	$('#joinButton').click(function (){
-		if(typeof connection == 'undefined' && typeof localClient != undefined){
+		if(connection == null && localClient != null){
 			setConnection(localClient.connect($('#joinInput').val()));
 			console.log('Connected to client');
 		}
@@ -96,12 +100,14 @@ function setLocalClient(newClient){
 
 	localClient.on('error', function(err){
 		console.log("Local client error: " + err.type);
+		if(err.type != 'network')
+			reset();
 	});
 }
 
 // Put connection bindings here
 function setConnection(newConnection){
-	if(typeof connection == 'undefined'){
+	if(connection == null){
 		connection = newConnection;
 
 		connection.on('open', function() {
@@ -110,10 +116,17 @@ function setConnection(newConnection){
 
 		connection.on('error', function(err){
 			console.log("Remote client error: " + err.type);
-			connection = null;
+			if(err.type != 'network')
+				reset();
+		});
+
+		connection.on('close', function(){
+			console.log('connection closed');
+			reset();
 		});
 
 		connection.on('data', function(data){
+			timeoutTimer = 0;
 			onRecieveMessage(data);
 		});
 	}
@@ -148,6 +161,9 @@ function onRecieveMessage(peerMessageJSON) {
 }
 
 function sendInput(){
+	if(!isTicking)
+		return;
+
 	// Send two inputs if the client is behind
 	var timesToSend = 1;
 	if(localInputBuffer.length < remoteInputBuffer.length - 1)
@@ -168,10 +184,10 @@ function sendInput(){
 function onRecieveInput(recievedInput){
 	remoteInputBuffer.push(recievedInput)
 	numberOfRecievedInputs += 1;
-	//console.log("Inputs sent: " + numberOfSentInputs.toString() + " | Inputs recieved: " + numberOfRecievedInputs.toString());
 }
 
 function start(){
+	isTicking = true;
 	sendInput();
 	$(document).trigger(startEvent);
 	netTick();
@@ -181,6 +197,9 @@ var lastLocalInput;
 var lastRemoteInput;
 
 function netTick(){
+	if(!isTicking)
+		return;
+
 	var lowestBuffer = 0;
 	if(localInputBuffer.length < remoteInputBuffer.length){
 		lowestBuffer = localInputBuffer.length;
@@ -207,5 +226,31 @@ function netTick(){
 		$(document).trigger(endTickEvent);
 	}
 	
+	timeoutTimer += 1;
+	if(timeoutTimer > maxTimeout){
+		reset();
+		return;
+	}
 	setTimeout(netTick, 1000/120);
+}
+
+function reset() {
+	isTicking = false;
+
+	connection.close();
+	connection = null;
+
+	var currentInput = new Inputs();
+
+	var localInputBuffer = [];
+	var remoteInputBuffer = [];
+
+	var numberOfSentInputs = 0;
+	var numberOfRecievedInputs = 0;
+
+	var bufferSize = 1;
+	var canTick = false;
+
+	var isHost = false;
+	$(document).trigger(resetEvent);
 }
