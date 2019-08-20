@@ -6,13 +6,14 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var ExpressPeerServer = require('peer').ExpressPeerServer;
 
-var hostingClients = [];
+var searchingClients = [];
 var connectedClients = [];
 
 class networkClient {
 	constructor(newClientSocket, newClientID) {
 		this.socket = newClientSocket;
 		this.id = newClientID;
+		this.pingingClient = null;
 	}
 }
 
@@ -46,19 +47,35 @@ io.on('connection', function(socket){
 		}
 	});
 
-	socket.on('requestHost', function(){
+	socket.on('requestSearch', function(){
 		var requestingClient = getClientFromSocket(socket, connectedClients);
-		if(requestingClient != null && getClientFromSocket(socket, hostingClients) == null)
-			hostingClients.push(requestingClient);
+		if(requestingClient != null && getClientFromSocket(socket, searchingClients) == null){
+			searchingClients.push(requestingClient);
+			socket.emit('confirmSearch');
+		}
 	});
 
-	socket.on('requestHostList', function(){
-		var hostListToSend = [];
-		for (var i = 0; i < hostingClients.length; i++) {
-			hostListToSend.push(hostingClients[i].id);
+	socket.on('requestRandomClient', function() {
+		var requestingClient = getClientFromSocket(socket, searchingClients);
+		if(requestingClient != null){
+			for (var i = 0; i < searchingClients.length; i++) {
+				if (searchingClients[i] != requestingClient && searchingClients[i].pingingClient != requestingClient){
+					requestingClient.pingingClient = searchingClients[i];
+					socket.emit('sendRandomClient', searchingClients[i].id);
+					break;
+				}
+			}
+			socket.emit('sendRandomClient', null)
 		}
-		socket.emit('sendHostList', hostListToSend);
 	});
+
+	socket.on('foundMatch', function(){
+		var requestingClient = getClientFromSocket(socket, searchingClients);
+		requestingClient.pingingClient = null;
+		if(requestingClient != null){
+			searchingClients.splice(searchingClients.indexOf(requestingClient), 1);
+		}
+	})
 });
 
 function getClientFromID(idToCheck, arrayToCheck){

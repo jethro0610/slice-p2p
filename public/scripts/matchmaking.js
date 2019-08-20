@@ -1,31 +1,41 @@
 var matchmakingServer = io();
+var searching = false;
 requestClientID();
-var hostList = [];
-requestHostList();
+
+$(document).ready(function() {
+	$(document).on('start', onStart);
+});
 
 function requestClientID(){
 	matchmakingServer.emit('requestClientID');
 }
 
-function requestHost(){
-	matchmakingServer.emit('requestHost');
+function requestSearch(){
+	matchmakingServer.emit('requestSearch');
 }
 
-function requestHostList(){
-	matchmakingServer.emit('requestHostList');
-}
+matchmakingServer.on('confirmSearch', function() {
+	searching = true;
+	matchmakingServer.emit('requestRandomClient');
+});
 
-function joinRandom(){
-	var randomInt = Math.floor(Math.random() * hostList.length);
-	setConnection(localClient.connect(hostList[randomInt]));
-}
+matchmakingServer.on('sendRandomClient', function(joinClientID) {
+	console.log('got random client');
+	if(searching){
+		if(joinClientID != null){
+			setConnection(localClient.connect(joinClientID));
+		}
+		else{
+			matchmakingServer.emit('requestRandomClient');
+		}
+	}
+});
 
 matchmakingServer.on('sendClientID', function(newClientID){
 	console.log('recieved client id: ' + newClientID.toString());
 	setLocalClient(new Peer(newClientID, {host: 'localhost', port: 3000, path:'/api'}));
 });
 
-matchmakingServer.on('sendHostList', function(newHostList){
-	hostList = newHostList;
-	console.log(hostList);
-});
+function onStart(){
+	matchmakingServer.emit('foundMatch');
+}

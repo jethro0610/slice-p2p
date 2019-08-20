@@ -71,14 +71,14 @@ class PeerMessage {
 
 $(document).ready(function() {
 	//setLocalClient(new Peer());
-	/*
+	
 	$('#joinButton').click(function (){
 		if(typeof connection == 'undefined' && typeof localClient != undefined){
 			setConnection(localClient.connect($('#joinInput').val()));
 			console.log('Connected to client');
 		}
 	});
-	*/
+	
 });
 
 // Put local client bindings here
@@ -101,20 +101,22 @@ function setLocalClient(newClient){
 
 // Put connection bindings here
 function setConnection(newConnection){
-	connection = newConnection;
+	if(typeof connection == 'undefined'){
+		connection = newConnection;
 
-	connection.on('open', function() {
-		start();
-	});
+		connection.on('open', function() {
+			start();
+		});
 
-	connection.on('error', function(err){
-		console.log("Remote client error: " + err.type);
-		connection = null;
-	});
+		connection.on('error', function(err){
+			console.log("Remote client error: " + err.type);
+			connection = null;
+		});
 
-	connection.on('data', function(data){
-		onRecieveMessage(data);
-	});
+		connection.on('data', function(data){
+			onRecieveMessage(data);
+		});
+	}
 }
 
 function sendMessage(peerMessage){
