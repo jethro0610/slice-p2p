@@ -1,58 +1,67 @@
 var hasStarted = false;
 
-var gameWorld;
-var player1;
-var player2;
-var gameCanvas;
+var gameWorld = null;
+var player1 = null;
+var player2 = null;
+var gameCanvas = null;
 
 var gameScale = 0.5;
+
+var menuElement = null;
+var gameWindow = null;
+var hostCodeElement = null;
 
 window.onkeydown = function(e) { 
   return !(e.keyCode == 32 && e.target == document.body);
 }; 
 
-$(document).ready(function() {
-	$(document).on('start', startGame);
-	$(document).on('net-tick', gameNetTick);
-	$(document).on('reset', onReset);
+document.addEventListener('DOMContentLoaded', function() {
+	document.addEventListener('updateHostCode', (e) => onUpdateHostCode(e));
+	document.addEventListener('start', startGame);
+	document.addEventListener('net-tick',(e) => gameNetTick(e));
+	document.addEventListener('reset',() => onReset());
 
 	showMenu();
 });
 
 function showMenu(){
-	var menuDiv = document.createElement('DIV');
-	menuDiv.innerHTML = 'Your ID: ';
-	menuDiv.id = 'menu';
-	document.body.appendChild(menuDiv);
+	menuElement = document.createElement('DIV');
+	menuElement.innerHTML = 'Your ID: ';
+	menuElement.id = 'menu';
+	document.body.appendChild(menuElement);
 
-	var hostCode = document.createElement('SPAN');
+	hostCodeElement = document.createElement('SPAN');
 	if(localClient != null)
-		hostCode.innerHTML = localClient.id;
-	hostCode.id = 'hostCode';
-	menuDiv.appendChild(hostCode);
+		hostCodeElement.innerHTML = localClient.id;
+	hostCodeElement.id = 'hostCode';
+	menuElement.appendChild(hostCodeElement);
 
-	var paragraphSeperator = document.createElement('P');
-	menuDiv.appendChild(paragraphSeperator);
+	var hostCodeSeperator = document.createElement('P');
+	menuElement.appendChild(hostCodeSeperator);
 
 	var joinButton = document.createElement('BUTTON');
 	joinButton.innerHTML = 'Join';
 	joinButton.id = 'joinButton';
-	menuDiv.appendChild(joinButton);
+	menuElement.appendChild(joinButton);
 
 	var joinInput = document.createElement('INPUT');
 	joinInput.id = 'joinInput';
-	menuDiv.appendChild(joinInput);
+	menuElement.appendChild(joinInput);
 
-	$('#joinButton').click(function (){
+	joinButton.addEventListener('click', () => {
 		if(connection == null && localClient != null){
-			setConnection(localClient.connect($('#joinInput').val()));
+			setConnection(localClient.connect(joinInput.value));
 			console.log('Connected to client');
 		}
 	});
 }
 
 function startGame(){
-	$('#menu').remove();
+	if(menuElement != null){
+		document.body.removeChild(menuElement);
+		menuElement = null;
+	}
+
 	gameWorld = new GameWorld(1000, 500);
 	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0, 'right', 'red');
 	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0, 'left', 'blue');
@@ -75,7 +84,7 @@ function startGame(){
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 	}
-
+	gameWindow = gameCanvas.canvas;
 	hasStarted = true;
 
 	gameCanvas.init();
@@ -138,6 +147,13 @@ function drawTriangle(x, y, width, height, color, context){
 
 function onReset(){
 	hasStarted = false;
-	$('#gameWindow').remove();
+	if(gameWindow != null){
+		document.body.removeChild(gameWindow);
+		gameWindow = null;
+	};
 	showMenu();
+}
+
+function onUpdateHostCode(e){
+	hostCodeElement.innerHTML = e.newHostCode;
 }

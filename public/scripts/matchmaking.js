@@ -1,8 +1,8 @@
 var matchmakingServer = io();
 var searching = false;
 
-$(document).ready(function() {
-	$(document).on('start', onStart);
+document.addEventListener('DOMContentLoaded', function() {
+	document.addEventListener('start', () => onStart());
 });
 
 function requestSearch(){

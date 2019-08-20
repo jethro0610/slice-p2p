@@ -17,11 +17,13 @@ var numberOfRecievedInputs = 0;
 var bufferSize = 1;
 var canTick = false;
 
-var startTickEvent = new $.Event('start-tick');
-var tickEvent = new $.Event('net-tick');
-var endTickEvent = new $.Event('end-tick');
-var startEvent = new $.Event('start');
-var resetEvent = new $.Event('reset');
+var startTickEvent = new Event('start-tick');
+var tickEvent = new Event('net-tick');
+var endTickEvent = new Event('end-tick');
+var startEvent = new Event('start');
+var resetEvent = new Event('reset');
+var updateHostCodeEvent = new Event('updateHostCode');
+
 
 var isHost = false;
 
@@ -82,7 +84,8 @@ class PeerMessage {
 function setLocalClient(newClient){
 	localClient = newClient;
 	localClient.on('open', function(id) {
-		$('#hostCode').text(localClient.id);
+		updateHostCodeEvent.newHostCode = id;
+		document.dispatchEvent(updateHostCodeEvent);
 	});
 
 	localClient.on('connection', function(conn){
@@ -182,7 +185,7 @@ function onRecieveInput(recievedInput){
 function start(){
 	isTicking = true;
 	sendInput();
-	$(document).trigger(startEvent);
+	document.dispatchEvent(startEvent);
 	netTick();
 }
 
@@ -202,7 +205,7 @@ function netTick(){
 	}
 
 	if(lowestBuffer > 0){
-		$(document).trigger(startTickEvent);
+		document.dispatchEvent(startTickEvent);
 		for (var i = 0; i < lowestBuffer; i++) {
 			tickEvent.hasInput = true;
 			lastLocalInput = localInputBuffer.shift();
@@ -211,9 +214,9 @@ function netTick(){
 			tickEvent.localInputThisTick = lastLocalInput;
 			tickEvent.remoteInputThisTick = lastRemoteInput;
 
-			$(document).trigger(tickEvent);
+			document.dispatchEvent(tickEvent);
 		}
-		$(document).trigger(endTickEvent);
+		document.dispatchEvent(endTickEvent);
 	}
 	
 	timeoutTimer += 1;
@@ -250,5 +253,5 @@ function reset() {
 	timeoutTimer = 0;
 
 	isHost = false;
-	$(document).trigger(resetEvent);
+	document.dispatchEvent(resetEvent);
 }
