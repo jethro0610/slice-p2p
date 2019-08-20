@@ -13,10 +13,9 @@ class networkClient {
 	constructor(newClientSocket, newClientID) {
 		this.socket = newClientSocket;
 		this.id = newClientID;
-		this.isPinging = false;
-		this.canPing = true;
-		this.canPingTimer = null;
-		this.socket.emit('hi');
+
+		this.isPinging = false
+		this.sendClientTimer = null;
 
 		this.assignSocketFunctions();
 	}
@@ -27,54 +26,53 @@ class networkClient {
 
 	assignSocketFunctions(){
 		this.socket.on('requestSearch', () => this.onRequestSearch());
-
-		this.socket.on('requestRandomClient', () => this.onRequestRandomClient());
-
+		this.socket.on('denyClient', () => this.onDenyClient());
 		this.socket.on('foundMatch', () => this.onFoundMatch());
 	}
 
 	onRequestSearch(){
 		if(!searchingClients.includes(this)){
 			searchingClients.push(this);
-			this.socket.emit('confirmSearch');
+			this.sendClientTimer = setTimeout(() => this.sendClient(), 1000);
 		}
 	}
 
-	onRequestRandomClient(){
-		if(!this.isPinging) {
-			if(this.canPing){
-				console.log('pinging');
-				if(this.canPingTimer == null)
-					this.canPingTimer = setTimeout(() => this.resetTimer(),1000);
-
-				this.canPing = false;
-				this.isPinging = true;
-				for (var i = 0; i < searchingClients.length; i++) {
-					if (searchingClients[i] != this && !searchingClients[i].isPinging){
-						this.socket.emit('sendRandomClient', searchingClients[i].id);
-						break;
-					}
+	sendClient(){
+		if(this.isSearching()){
+			for (var i = 0; i < searchingClients.length; i++) {
+				if (searchingClients[i] != this && !searchingClients[i].isPinging){
+					this.socket.emit('sendClient', searchingClients[i].id);
+					this.isPinging = true;
+					break;
 				}
 			}
-			this.socket.emit('sendRandomClient', null);
+			this.sendClientTimer = null;
+			if(searchingClients.length <= 1)
+				this.sendClientTimer = setTimeout(() => this.sendClient(), 1000);
 		}
-		else{
-			console.log('stop pinging');
+	}
+
+	onDenyClient(){
+		if(this.isSearching() && this.isPinging){
 			this.isPinging = false;
-			this.socket.emit('sendRandomClient', null);
+			if(this.sendClientTimer == null)
+				this.sendClientTimer = setTimeout(() => this.sendClient(), 1000);
 		}
 	}
 
 	onFoundMatch(){
-		this.requestingClient.isPinging = false;
-		this.requestingClient.canPing = true;
-		this.requestingClient.canPingTimer = null;
+		console.log('found match');
+		this.isPinging = false;
 		searchingClients.splice(searchingClients.indexOf(this), 1);
 	}
 
-	resetTimer() {
-		this.canPing = true;
-		this.canPingTimer = null;
+	isSearching(){
+		if(searchingClients.includes(this)){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 }
 

@@ -14,21 +14,9 @@ function requestSearch(){
 	matchmakingServer.emit('requestSearch');
 }
 
-matchmakingServer.on('confirmSearch', function() {
-	searching = true;
-	matchmakingServer.emit('requestRandomClient');
-});
-
-matchmakingServer.on('sendRandomClient', function(joinClientID) {
-	if(searching){
-		if(joinClientID != null && typeof connection == 'undefined'){
-			setConnection(localClient.connect(joinClientID));
-		}
-		else{
-			matchmakingServer.emit('requestRandomClient');
-		}
-	}
-});
+matchmakingServer.on('sendClient', function(joinClientID){
+	setConnection(localClient.connect(joinClientID));
+})
 
 matchmakingServer.on('sendClientID', function(newClientID){
 	console.log('recieved client id: ' + newClientID.toString());
