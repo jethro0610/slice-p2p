@@ -68,7 +68,7 @@ io.on('connection', function(socket){
 						requestingClient.canPingTimer = setTimeout(function(){
 						 	requestingClient.canPing = true;
 						 	requestingClient.canPingTimer = null;
-						},1000*10);
+						},1000);
 					}
 
 					requestingClient.canPing = false;
