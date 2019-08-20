@@ -20,9 +20,8 @@ matchmakingServer.on('confirmSearch', function() {
 });
 
 matchmakingServer.on('sendRandomClient', function(joinClientID) {
-	console.log('got random client');
 	if(searching){
-		if(joinClientID != null){
+		if(joinClientID != null && typeof connection == 'undefined'){
 			setConnection(localClient.connect(joinClientID));
 		}
 		else{

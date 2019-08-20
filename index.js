@@ -13,7 +13,9 @@ class networkClient {
 	constructor(newClientSocket, newClientID) {
 		this.socket = newClientSocket;
 		this.id = newClientID;
-		this.pingingClient = null;
+		this.isPinging = false;
+		this.canPing = true;
+		this.canPingTimer = null;
 	}
 }
 
@@ -58,21 +60,42 @@ io.on('connection', function(socket){
 	socket.on('requestRandomClient', function() {
 		var requestingClient = getClientFromSocket(socket, searchingClients);
 		if(requestingClient != null){
-			for (var i = 0; i < searchingClients.length; i++) {
-				if (searchingClients[i] != requestingClient && searchingClients[i].pingingClient != requestingClient){
-					requestingClient.pingingClient = searchingClients[i];
-					socket.emit('sendRandomClient', searchingClients[i].id);
-					break;
+
+			if(!requestingClient.isPinging) {
+				if(requestingClient.canPing){
+					console.log('pinging');
+					if(requestingClient.canPingTimer == null){
+						requestingClient.canPingTimer = setTimeout(function(){
+						 	requestingClient.canPing = true;
+						 	requestingClient.canPingTimer = null;
+						},1000*10);
+					}
+
+					requestingClient.canPing = false;
+					requestingClient.isPinging = true;
+					for (var i = 0; i < searchingClients.length; i++) {
+						if (searchingClients[i] != requestingClient && !searchingClients[i].isPinging){
+							socket.emit('sendRandomClient', searchingClients[i].id);
+							break;
+						}
+					}
 				}
+				socket.emit('sendRandomClient', null);
 			}
-			socket.emit('sendRandomClient', null)
+			else{
+				console.log('stop pinging')
+				requestingClient.isPinging = false;
+				socket.emit('sendRandomClient', null);
+			}
 		}
 	});
 
 	socket.on('foundMatch', function(){
 		var requestingClient = getClientFromSocket(socket, searchingClients);
-		requestingClient.pingingClient = null;
 		if(requestingClient != null){
+			requestingClient.isPinging = false;
+			requestingClient.canPing = true;
+			requestingClient.canPingTimer = null;
 			searchingClients.splice(searchingClients.indexOf(requestingClient), 1);
 		}
 	})
