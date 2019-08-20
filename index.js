@@ -96,15 +96,25 @@ app.use('/api', peerServer);
 io.on('connection', function(socket){
 	console.log('a client connected to socketIO');
 	
-	socket.on('requestClientID', function(){
-		console.log('client id requested');
-		// Only assign an ID if the client doesn't have one
-		if(getClientFromSocket(socket, connectedClients) == null){
-			var generatedID = uniqid.time();
-			connectedClients.push(new networkClient(socket, generatedID));
-			socket.emit('sendClientID', generatedID);
-		}
-	});
+	console.log('client id requested');
+	// Only assign an ID if the client doesn't have one
+	if(getClientFromSocket(socket, connectedClients) == null){
+		var generatedID = uniqid.time();
+		connectedClients.push(new networkClient(socket, generatedID));
+		socket.emit('sendClientID', generatedID);
+	}
+});
+
+peerServer.on('disconnect', (client) =>{
+	var disconnectingPeer = getClientFromID(client.toString(), connectedClients);
+	if(disconnectingPeer != null){
+		connectedClients.splice(connectedClients.indexOf(disconnectingPeer), 1);
+	}
+
+	var disconnectingSearch = getClientFromID(client.toString(), searchingClients);
+	if(disconnectingSearch != null){
+		searchingClients.splice(searchingClients.indexOf(disconnectingSearch), 1);
+	}
 });
 
 function getClientFromID(idToCheck, arrayToCheck){

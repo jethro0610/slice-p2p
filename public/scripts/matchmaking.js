@@ -1,21 +1,18 @@
 var matchmakingServer = io();
 var searching = false;
-requestClientID();
 
 $(document).ready(function() {
 	$(document).on('start', onStart);
 });
-
-function requestClientID(){
-	matchmakingServer.emit('requestClientID');
-}
 
 function requestSearch(){
 	matchmakingServer.emit('requestSearch');
 }
 
 matchmakingServer.on('sendClient', function(joinClientID){
-	setConnection(localClient.connect(joinClientID));
+	if(typeof connection == 'undefined'){
+		setConnection(localClient.connect(joinClientID));
+	}
 })
 
 matchmakingServer.on('sendClientID', function(newClientID){
