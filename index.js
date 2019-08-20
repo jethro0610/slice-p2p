@@ -16,6 +16,65 @@ class networkClient {
 		this.isPinging = false;
 		this.canPing = true;
 		this.canPingTimer = null;
+		this.socket.emit('hi');
+
+		this.assignSocketFunctions();
+	}
+
+	searchForClient(){
+		
+	}
+
+	assignSocketFunctions(){
+		this.socket.on('requestSearch', () => this.onRequestSearch());
+
+		this.socket.on('requestRandomClient', () => this.onRequestRandomClient());
+
+		this.socket.on('foundMatch', () => this.onFoundMatch());
+	}
+
+	onRequestSearch(){
+		if(!searchingClients.includes(this)){
+			searchingClients.push(this);
+			this.socket.emit('confirmSearch');
+		}
+	}
+
+	onRequestRandomClient(){
+		if(!this.isPinging) {
+			if(this.canPing){
+				console.log('pinging');
+				if(this.canPingTimer == null)
+					this.canPingTimer = setTimeout(() => this.resetTimer(),1000);
+
+				this.canPing = false;
+				this.isPinging = true;
+				for (var i = 0; i < searchingClients.length; i++) {
+					if (searchingClients[i] != this && !searchingClients[i].isPinging){
+						this.socket.emit('sendRandomClient', searchingClients[i].id);
+						break;
+					}
+				}
+			}
+			this.socket.emit('sendRandomClient', null);
+		}
+		else{
+			console.log('stop pinging');
+			this.isPinging = false;
+			this.socket.emit('sendRandomClient', null);
+		}
+	}
+
+	onFoundMatch(){
+		this.requestingClient.isPinging = false;
+		this.requestingClient.canPing = true;
+		this.requestingClient.canPingTimer = null;
+		searchingClients.splice(searchingClients.indexOf(this), 1);
+	}
+
+	resetTimer() {
+		this.canPing = true;
+		this.canPingTimer = null;
 	}
 }
 
@@ -48,57 +107,6 @@ io.on('connection', function(socket){
 			socket.emit('sendClientID', generatedID);
 		}
 	});
-
-	socket.on('requestSearch', function(){
-		var requestingClient = getClientFromSocket(socket, connectedClients);
-		if(requestingClient != null && getClientFromSocket(socket, searchingClients) == null){
-			searchingClients.push(requestingClient);
-			socket.emit('confirmSearch');
-		}
-	});
-
-	socket.on('requestRandomClient', function() {
-		var requestingClient = getClientFromSocket(socket, searchingClients);
-		if(requestingClient != null){
-
-			if(!requestingClient.isPinging) {
-				if(requestingClient.canPing){
-					console.log('pinging');
-					if(requestingClient.canPingTimer == null){
-						requestingClient.canPingTimer = setTimeout(function(){
-						 	requestingClient.canPing = true;
-						 	requestingClient.canPingTimer = null;
-						},1000);
-					}
-
-					requestingClient.canPing = false;
-					requestingClient.isPinging = true;
-					for (var i = 0; i < searchingClients.length; i++) {
-						if (searchingClients[i] != requestingClient && !searchingClients[i].isPinging){
-							socket.emit('sendRandomClient', searchingClients[i].id);
-							break;
-						}
-					}
-				}
-				socket.emit('sendRandomClient', null);
-			}
-			else{
-				console.log('stop pinging')
-				requestingClient.isPinging = false;
-				socket.emit('sendRandomClient', null);
-			}
-		}
-	});
-
-	socket.on('foundMatch', function(){
-		var requestingClient = getClientFromSocket(socket, searchingClients);
-		if(requestingClient != null){
-			requestingClient.isPinging = false;
-			requestingClient.canPing = true;
-			requestingClient.canPingTimer = null;
-			searchingClients.splice(searchingClients.indexOf(requestingClient), 1);
-		}
-	})
 });
 
 function getClientFromID(idToCheck, arrayToCheck){
