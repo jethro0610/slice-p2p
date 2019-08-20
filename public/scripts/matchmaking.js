@@ -1,6 +1,7 @@
 var matchmakingServer = io();
 requestClientID();
-var hostList = []
+var hostList = [];
+requestHostList();
 
 function requestClientID(){
 	matchmakingServer.emit('requestClientID');
@@ -12,6 +13,11 @@ function requestHost(){
 
 function requestHostList(){
 	matchmakingServer.emit('requestHostList');
+}
+
+function joinRandom(){
+	var randomInt = Math.floor(Math.random() * hostList.length);
+	setConnection(localClient.connect(hostList[randomInt]));
 }
 
 matchmakingServer.on('sendClientID', function(newClientID){
