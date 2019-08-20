@@ -5,6 +5,9 @@ var connection = null;
 
 var currentInput = new Inputs();
 
+var lastLocalInput = null;
+var lastRemoteInput = null;
+
 var localInputBuffer = [];
 var remoteInputBuffer = [];
 
@@ -74,16 +77,6 @@ class PeerMessage {
 		this.messageData = messageData;
 	}
 }
-
-$(document).ready(function() {
-	$('#joinButton').click(function (){
-		if(connection == null && localClient != null){
-			setConnection(localClient.connect($('#joinInput').val()));
-			console.log('Connected to client');
-		}
-	});
-	
-});
 
 // Put local client bindings here
 function setLocalClient(newClient){
@@ -193,9 +186,6 @@ function start(){
 	netTick();
 }
 
-var lastLocalInput;
-var lastRemoteInput;
-
 function netTick(){
 	if(!isTicking)
 		return;
@@ -235,22 +225,30 @@ function netTick(){
 }
 
 function reset() {
+	if (!isTicking)
+		return;
+
 	isTicking = false;
 
 	connection.close();
 	connection = null;
 
-	var currentInput = new Inputs();
+	currentInput = new Inputs();
 
-	var localInputBuffer = [];
-	var remoteInputBuffer = [];
+	lastLocalInput = null;
+	lastRemoteInput = null;
 
-	var numberOfSentInputs = 0;
-	var numberOfRecievedInputs = 0;
+	localInputBuffer = [];
+	remoteInputBuffer = [];
 
-	var bufferSize = 1;
-	var canTick = false;
+	numberOfSentInputs = 0;
+	numberOfRecievedInputs = 0;
 
-	var isHost = false;
+	bufferSize = 1;
+	canTick = false;
+
+	timeoutTimer = 0;
+
+	isHost = false;
 	$(document).trigger(resetEvent);
 }

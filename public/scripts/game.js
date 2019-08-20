@@ -15,7 +15,41 @@ $(document).ready(function() {
 	$(document).on('start', startGame);
 	$(document).on('net-tick', gameNetTick);
 	$(document).on('reset', onReset);
+
+	showMenu();
 });
+
+function showMenu(){
+	var menuDiv = document.createElement('DIV');
+	menuDiv.innerHTML = 'Your ID: ';
+	menuDiv.id = 'menu';
+	document.body.appendChild(menuDiv);
+
+	var hostCode = document.createElement('SPAN');
+	if(localClient != null)
+		hostCode.innerHTML = localClient.id;
+	hostCode.id = 'hostCode';
+	menuDiv.appendChild(hostCode);
+
+	var paragraphSeperator = document.createElement('P');
+	menuDiv.appendChild(paragraphSeperator);
+
+	var joinButton = document.createElement('BUTTON');
+	joinButton.innerHTML = 'Join';
+	joinButton.id = 'joinButton';
+	menuDiv.appendChild(joinButton);
+
+	var joinInput = document.createElement('INPUT');
+	joinInput.id = 'joinInput';
+	menuDiv.appendChild(joinInput);
+
+	$('#joinButton').click(function (){
+		if(connection == null && localClient != null){
+			setConnection(localClient.connect($('#joinInput').val()));
+			console.log('Connected to client');
+		}
+	});
+}
 
 function startGame(){
 	$('#menu').remove();
@@ -105,4 +139,5 @@ function drawTriangle(x, y, width, height, color, context){
 function onReset(){
 	hasStarted = false;
 	$('#gameWindow').remove();
+	showMenu();
 }

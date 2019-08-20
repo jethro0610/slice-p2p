@@ -10,7 +10,7 @@ function requestSearch(){
 }
 
 matchmakingServer.on('sendClient', function(joinClientID){
-	if(typeof connection == 'undefined'){
+	if(connection == null){
 		setConnection(localClient.connect(joinClientID));
 	}
 })
