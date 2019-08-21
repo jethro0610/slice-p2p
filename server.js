@@ -9,6 +9,8 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 var searchingClients = [];
 var connectedClients = [];
 
+logSearches();
+
 function logSearches(){
 	console.log(searchingClients.length);
 	setTimeout(() => logSearches(), 2000);
