@@ -94,8 +94,8 @@ class GameWorld {
 		context.fillStyle = color;
 		context.beginPath();
 		context.moveTo(x, y);
-		context.lineTo(x + width, y - height);
-		context.lineTo(x - width, y - height);
+		context.lineTo(x + width * this.windowScale, y - height * this.windowScale);
+		context.lineTo(x - width * this.windowScale, y - height * this.windowScale);
 		context.fill();
 		context.fillStyle = 'black';
 	}
@@ -281,36 +281,40 @@ class RoundManager{
 	  	this.gameWorld.context.textAlign = "center";
 
 	  	this.gameWorld.context.fillStyle = 'gray';
-	  	this.gameWorld.context.font = '16px Arial';
+	  	this.gameWorld.context.font = this.fontFromSize(32);
 		this.gameWorld.context.fillText('First to ' + this.winningScore.toString(), (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height - 18) * this.gameWorld.windowScale);
 		this.gameWorld.context.fillStyle = 'black';
 
 	  	if(this.roundState != 'startGameIntro' && this.roundState != 'startGameCount' && this.roundState != 'endGame'){
 			if(this.roundState != 'endRound'){
-				this.gameWorld.context.font = '32px Arial';
+				this.gameWorld.context.font = this.fontFromSize(64);
 				this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, 50 * this.gameWorld.windowScale);
 			}
 			else{
-				this.gameWorld.context.font = '64px Arial';
+				this.gameWorld.context.font = this.fontFromSize(128);
 				this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
 			}
 		}
 		else{
 			if(this.startGameTimer > this.startGameLength/8){
-		  		this.gameWorld.context.font = '64px Arial';
+		  		this.gameWorld.context.font = this.fontFromSize(128);
 				this.gameWorld.context.fillText('Ready...', (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
 	  		}
 		}
 
 		if(this.displayStartText){
-			this.gameWorld.context.font = '64px Arial';
+			this.gameWorld.context.font = this.fontFromSize(128);
 			this.gameWorld.context.fillText('Slice!', (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
 		}
 
 		if(this.roundState == 'endGame'){
-			this.gameWorld.context.font = '64px Arial';
+			this.gameWorld.context.font = this.fontFromSize(128);
 			this.gameWorld.context.fillText(capitalizeFirstLetter(this.winningPlayer.color) + ' wins!', (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
 		}
+	}
+
+	fontFromSize(fontSize){
+		return (fontSize * this.gameWorld.windowScale).toString() + 'px Arial';
 	}
 }
 
@@ -792,7 +796,7 @@ class Player {
 			32 * 4 * this.gameWorld.windowScale, 
 			16 * 4 * this.gameWorld.windowScale);
 
-		this.gameWorld.drawTriangle((this.drawX + 16) * this.gameWorld.windowScale, (this.drawY - 20) * this.gameWorld.windowScale, 10, 10, this.color, this.gameWorld.context);
+		this.gameWorld.drawTriangle((this.drawX + 16) * this.gameWorld.windowScale, (this.drawY - 12) * this.gameWorld.windowScale, 12, 12, this.color, this.gameWorld.context);
 	}
 
 	updateAnimState(){
