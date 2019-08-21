@@ -210,7 +210,7 @@ class RoundManager{
 		this.startGameTimer += 1;
 
 		if(this.startGameTimer >= this.startGameLength){
-			this.endRoundTimer = 0;
+			this.startGameTimer = 0;
 			this.stateInRound();
 			this.displayStartText = true;
 			setTimeout(() => {
@@ -280,7 +280,12 @@ class RoundManager{
 		this.gameWorld.context.textBaseline = 'middle';
 	  	this.gameWorld.context.textAlign = "center";
 
-	  	if(this.roundState != 'startGameIntro' && this.roundState != 'startGameCount'){
+	  	this.gameWorld.context.fillStyle = 'gray';
+	  	this.gameWorld.context.font = '16px Arial';
+		this.gameWorld.context.fillText('First to ' + this.winningScore.toString(), (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height - 18) * this.gameWorld.windowScale);
+		this.gameWorld.context.fillStyle = 'black';
+
+	  	if(this.roundState != 'startGameIntro' && this.roundState != 'startGameCount' && this.roundState != 'endGame'){
 			if(this.roundState != 'endRound'){
 				this.gameWorld.context.font = '32px Arial';
 				this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, 50 * this.gameWorld.windowScale);
