@@ -153,12 +153,17 @@ class RoundManager{
 		else if(this.roundState == 'endRound'){
 			this.endRoundTick()
 		}
+
+		if (this.endRoundTimer >= this.endRoundLength/2)
+			this.updateScoreText()
 	}
 
 	playerHitDash(dashingPlayer, hitPlayer){
 		dashingPlayer.score += 1;
 		this.stateEndRound();
+	}
 
+	updateScoreText() {
 		this.scoreText = '';
 		for (var i = 0; i < this.gameWorld.players.length; i++) {
 			this.scoreText += this.gameWorld.players[i].score.toString();
@@ -204,8 +209,17 @@ class RoundManager{
 	}
 
 	draw(){
-		this.gameWorld.context.font = '32px Arial';
-		this.gameWorld.context.fillText(this.scoreText, 10 * gameScale, 50 * gameScale);
+		this.gameWorld.context.textBaseline = 'middle';
+	  	this.gameWorld.context.textAlign = "center";
+
+		if(this.roundState != 'endRound'){
+			this.gameWorld.context.font = '32px Arial';
+			this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, 50 * this.gameWorld.windowScale);
+		}
+		else{
+			this.gameWorld.context.font = '64px Arial';
+			this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
+		}
 	}
 }
 
