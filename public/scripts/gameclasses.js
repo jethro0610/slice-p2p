@@ -23,13 +23,28 @@ function getDistance(point1, point2){
 }
 
 class GameWorld {
-	constructor(width, height){
+	constructor(width, height, windowScale){
+		this.windowScale = windowScale
 		this.width = width;
 		this.height = height;
 		this.rectangles = [];
 		this.players = [];
 		this.roundManager = new RoundManager(this);
 		this.resetToNeutral = true;
+		this.canvas = document.createElement('canvas');
+
+		this.canvas.setAttribute('id', 'gameWindow');
+		this.canvas.width = this.width * this.windowScale;
+		this.canvas.height = this.height * this.windowScale;
+		this.context = this.canvas.getContext('2d');
+		this.context.imageSmoothingEnabled = false;
+		document.body.appendChild(this.canvas);
+
+		this.draw();
+	}
+
+	clearCanvas() {
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 
 	addPlayer(x, y, spawnDirection, color) {
@@ -49,6 +64,41 @@ class GameWorld {
 		for (var i = 0; i < this.players.length; i++) {
 			this.players[i].tick();
 		}
+	}
+
+	draw(){
+		this.clearCanvas();
+
+		// Draw all rectangles
+		for(var i = 0; i < this.rectangles.length; i++){
+		  	this.context.fillStyle = 'black';
+		  	this.context.fillRect(this.rectangles[i].x * this.windowScale, this.rectangles[i].y * this.windowScale, this.rectangles[i].width * this.windowScale, this.rectangles[i].height * this.windowScale);
+		}
+		// Draw all players
+		for(var i = 0; i < this.players.length; i++){
+			var playerToDraw = this.players[i];
+			var spriteYOffset = 0;
+			if(playerToDraw.direction == 'left')
+				spriteYOffset = 17;
+		 	playerToDraw.drawTick();
+			this.context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, (playerToDraw.drawX  - 48)  * this.windowScale, (playerToDraw.drawY - 12) * this.windowScale, 32 * 4 * this.windowScale, 16 * 4 * this.windowScale);
+
+			this.drawTriangle((playerToDraw.drawX + 16) * this.windowScale, (playerToDraw.drawY - 20) * this.windowScale, 10, 10, playerToDraw.color, this.context);
+		}
+		//this.context.font = '32px Arial';
+		//this.context.fillText(player1.score.toString() + ' : ' + player2.score.toString(), 10 * gameScale, 50 * gameScale);
+
+		setTimeout(() => this.draw(), 1000/120);
+	}
+
+	drawTriangle(x, y, width, height, color, context){
+		context.fillStyle = color;
+		context.beginPath();
+		context.moveTo(x, y);
+		context.lineTo(x + width, y - height);
+		context.lineTo(x - width, y - height);
+		context.fill();
+		context.fillStyle = 'black';
 	}
 }
 

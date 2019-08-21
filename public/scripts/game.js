@@ -1,5 +1,3 @@
-var hasStarted = false;
-
 var gameWorld = null;
 var player1 = null;
 var player2 = null;
@@ -96,7 +94,7 @@ function startGame(){
 		menuBlurb = null;
 	}
 
-	gameWorld = new GameWorld(1000, 700);
+	gameWorld = new GameWorld(1000, 700, 0.5);
 	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0, 'right', 'red');
 	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0, 'left', 'blue');
 
@@ -104,26 +102,8 @@ function startGame(){
 	gameWorld.addRectangle(200, 16, gameWorld.width - 200, 400);
 	gameWorld.addRectangle(200, 16, 0, 400);
 
-	gameCanvas = {
-		canvas : document.createElement('canvas'),
-		init : function() {
-			this.canvas.setAttribute('id', 'gameWindow');
-			this.canvas.width = gameWorld.width * gameScale;
-			this.canvas.height = gameWorld.height * gameScale;
-			this.context = this.canvas.getContext('2d');
-			this.context.imageSmoothingEnabled = false;
-			document.body.appendChild(this.canvas);
-		},
-		clear : function(){
-			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		}
-	}
 	menuBlurbText = '';
-	gameWindow = gameCanvas.canvas;
-	hasStarted = true;
-
-	gameCanvas.init();
-	draw();
+	gameWindow = gameWorld.canvas;
 }
 
 function gameNetTick(e){
@@ -137,45 +117,6 @@ function gameNetTick(e){
 	}
 
 	gameWorld.tick();
-}
-
-function draw(){
-	if(!hasStarted)
-		return;
-
-	gameCanvas.clear();
-
-	context = gameCanvas.context;
-	// Draw all rectangles
-	for(var i = 0; i < gameWorld.rectangles.length; i++){
-	  	context.fillStyle = 'black';
-	  	context.fillRect(gameWorld.rectangles[i].x * gameScale, gameWorld.rectangles[i].y * gameScale, gameWorld.rectangles[i].width * gameScale, gameWorld.rectangles[i].height * gameScale);
-	}
-	// Draw all players
-	for(var i = 0; i < gameWorld.players.length; i++){
-		var playerToDraw = gameWorld.players[i];
-		var spriteYOffset = 0;
-		if(playerToDraw.direction == 'left')
-			spriteYOffset = 17;
-	 	playerToDraw.drawTick();
-		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, (playerToDraw.drawX  - 48)  * gameScale, (playerToDraw.drawY - 12) * gameScale, 32 * 4 * gameScale, 16 * 4 * gameScale);
-
-		drawTriangle((playerToDraw.drawX + 16) * gameScale, (playerToDraw.drawY - 20) * gameScale, 10, 10, playerToDraw.color, context);
-	}
-	context.font = '32px Arial';
-	context.fillText(player1.score.toString() + ' : ' + player2.score.toString(), 10 * gameScale, 50 * gameScale);
-
-	setTimeout(draw, 1000/120);
-}
-
-function drawTriangle(x, y, width, height, color, context){
-	context.fillStyle = color;
-	context.beginPath();
-	context.moveTo(x, y);
-	context.lineTo(x + width, y - height);
-	context.lineTo(x - width, y - height);
-	context.fill();
-	context.fillStyle = 'black';
 }
 
 function updateMenuBlurb(newBlurb){
