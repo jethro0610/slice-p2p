@@ -102,15 +102,17 @@ class RoundManager{
 	}
 
 	tick() {
-		this.disableInput = false;
 		if(this.roundState == 'intro'){
-			this.disableInput = true;
 			this.introStateTick();
 		}
 		else if(this.roundState == 'endRound'){
-			this.disableInput = true;
 			this.endRoundTick()
 		}
+	}
+
+	playerHitDash(dashingPlayer, hitPlayer){
+		dashingPlayer.score += 1;
+		this.stateEndRound();
 	}
 
 	introStateTick() {
@@ -136,14 +138,17 @@ class RoundManager{
 		for (var i = 0; i < this.gameWorld.players.length; i++) {
 			this.gameWorld.players[i].resetNextTick = true;
 		}
+		this.disableInput = true;
 	}
 
 	stateInRound(){
 		this.roundState = 'inRound';
+		this.disableInput = false;
 	}
 
 	stateEndRound(){
 		this.roundState = 'endRound';
+		this.disableInput = true;
 	}
 }
 
@@ -490,36 +495,17 @@ class Player {
 				// Dash contact
 				if(this.rectangle.isIntersecting(playerToCheck.rectangle) && this.dashing){
 					if(playerToCheck.dashing){
-						// Clashes (have to do it on both players due to tick order)
-						if(playerToCheck.direction == 'right'){
-							playerToCheck.velX = -playerToCheck.dashSpeed;
-						}
-						else{
-							playerToCheck.velX = playerToCheck.dashSpeed;
-						}
-						playerToCheck.canDash = true;
-						playerToCheck.dashing = false;
-						playerToCheck.dashTimer = 0;
-
-						if(this.direction == 'right'){
-							this.velX = -this.dashSpeed;
-						}
-						else{
-							this.velX = this.dashSpeed;
-						}
-						this.canDash = true;
-						this.dashing = false;
-						this.dashTimer = 0;
+						// Clashes
+						playerToCheck.clash();
+						this.clash();
 					}
 					else if(!playerToCheck.hitByDash){
 						// Contact
-						this.score += 1;
+						this.roundManager.playerHitDash(this, playerToCheck);
 
 						var knockbackMult = 1;
-						if(this.gameWorld.resetToNeutral){
-							this.roundManager.stateEndRound();
+						if(this.gameWorld.resetToNeutral)
 							knockbackMult = 2;
-						}
 
 						if(this.direction == 'right'){
 							playerToCheck.velX = this.dashSpeed * knockbackMult;
@@ -563,6 +549,18 @@ class Player {
 		// Update draw position
 		this.drawX = this.x;
 		this.drawY = this.y;
+	}
+
+	clash(){
+		if(this.direction == 'right'){
+			this.velX = -this.dashSpeed;
+		}
+		else{
+			this.velX = this.dashSpeed;
+		}
+		this.canDash = true;
+		this.dashing = false;
+		this.dashTimer = 0;
 	}
 
 	drawTick(){
