@@ -9,13 +9,6 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 var searchingClients = [];
 var connectedClients = [];
 
-logSearches();
-
-function logSearches(){
-	console.log(searchingClients.length);
-	setTimeout(() => logSearches(), 2000);
-}
-
 class networkClient {
 	constructor(newClientSocket, newClientID) {
 		this.socket = newClientSocket;
@@ -56,13 +49,13 @@ class networkClient {
 			arrayWithoutClient.splice(arrayWithoutClient.indexOf(this), 1);
 			this.sendClientTimer = null;
 			if(arrayWithoutClient.length > 0){
-				while (true){
-					var sendClientIndex = getRandomInt(0, arrayWithoutClient.length - 1);
-					if (arrayWithoutClient[sendClientIndex] != this && !arrayWithoutClient[sendClientIndex].isPinging){
-						this.socket.emit('sendClient', arrayWithoutClient[sendClientIndex].id);
-						this.isPinging = true;
-						break;
-					}
+				var sendClientIndex = getRandomInt(0, arrayWithoutClient.length - 1);
+				if (arrayWithoutClient[sendClientIndex] != this && !arrayWithoutClient[sendClientIndex].isPinging){
+					this.socket.emit('sendClient', arrayWithoutClient[sendClientIndex].id);
+					this.isPinging = true;
+				}
+				else{
+					this.sendClientTimer = setTimeout(() => this.sendClient(), 1000);
 				}
 			}
 			else {
