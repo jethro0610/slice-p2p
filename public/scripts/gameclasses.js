@@ -108,7 +108,7 @@ class Player {
 		this.groundFriction = 0.1;
 		this.airFriction = 0.05;
 
-		this.pivotSpeed = 0.6
+		this.pivotSpeed = 1.0;
 
 		this.gravitySpeed = 1;
 		this.maxGravity = 15;
