@@ -18,6 +18,10 @@ function lerp(value1, value2, t){
 	return value1*t + value2*(1-t);
 }
 
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 function getDistance(point1, point2){
 	return Math.abs(point1 - point2);
 }
@@ -142,14 +146,19 @@ class RoundManager{
 
 		this.startGameTimer = 0;
 		this.startGameLength = 300;
-
 		this.displayStartText = false;
 
 		this.endRoundTimer = 0;
 		this.endRoundLength = 120;
 
+		this.endGameTimer = 0;
+		this.endGameLength = 300;
+		this.winningPlayer = null;
+
 		this.disableInput = true;
 		this.scoreText = '0 - 0';
+
+		this.winningScore = 10;
 	}
 
 	tick() {
@@ -165,6 +174,9 @@ class RoundManager{
 		else if(this.roundState == 'endRound'){
 			this.endRoundTick()
 		}
+		else if(this.roundState == 'endGame'){
+			this.endGameTick()
+		}
 
 		if (this.endRoundTimer >= this.endRoundLength/2)
 			this.updateScoreText()
@@ -172,6 +184,8 @@ class RoundManager{
 
 	playerHitDash(dashingPlayer, hitPlayer){
 		dashingPlayer.score += 1;
+		if(dashingPlayer.score >= this.winningScore)
+			this.winningPlayer = dashingPlayer;
 		this.stateEndRound();
 	}
 
@@ -219,7 +233,20 @@ class RoundManager{
 
 		if(this.endRoundTimer >= this.endRoundLength){
 			this.endRoundTimer = 0;
-			this.stateIntro();
+			if(this.winningPlayer == null){
+				this.stateIntro();
+			}
+			else{
+				this.stateEndGame();
+			}
+		}
+	}
+
+	endGameTick(){
+		this.endGameTimer += 1;
+
+		if(this.endGameTimer >= this.endGameLength){
+			reset();
 		}
 	}
 	//----------------------------------------------------
@@ -243,6 +270,11 @@ class RoundManager{
 		this.roundState = 'endRound';
 		this.disableInput = true;
 	}
+
+	stateEndGame(){
+		this.roundState = 'endGame';
+		this.disableInput = true;
+	}
 	//----------------------------------------------------
 	draw(){
 		this.gameWorld.context.textBaseline = 'middle';
@@ -259,7 +291,7 @@ class RoundManager{
 			}
 		}
 		else{
-			if(this.startGameTimer > this.startGameLength/4){
+			if(this.startGameTimer > this.startGameLength/8){
 		  		this.gameWorld.context.font = '64px Arial';
 				this.gameWorld.context.fillText('Ready...', (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
 	  		}
@@ -268,6 +300,11 @@ class RoundManager{
 		if(this.displayStartText){
 			this.gameWorld.context.font = '64px Arial';
 			this.gameWorld.context.fillText('Slice!', (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
+		}
+
+		if(this.roundState == 'endGame'){
+			this.gameWorld.context.font = '64px Arial';
+			this.gameWorld.context.fillText(capitalizeFirstLetter(this.winningPlayer.color) + ' wins!', (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
 		}
 	}
 }
@@ -432,6 +469,9 @@ class Player {
 	}
 
 	tick() {
+		if(this.roundManager.roundState == 'endGame')
+			return;
+
 		this.updateCollision();
 
 		// Input
@@ -684,6 +724,9 @@ class Player {
 	}
 
 	drawTick(){
+		if(this.roundManager.roundState == 'endGame')
+			return;
+
 		// Extrapolate draw position based on velocity
 		this.drawX = lerp(this.drawX, this.drawX + this.velX * this.timeDialation, this.extrapolationStrength);
 		this.drawY = lerp(this.drawY, this.drawY + this.velY * this.timeDialation, this.extrapolationStrength);
