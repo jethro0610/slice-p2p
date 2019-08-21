@@ -6,7 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function requestSearch(){
-	matchmakingServer.emit('requestSearch');
+	if(!searching){
+		searching = true;
+		matchmakingServer.emit('requestSearch');
+	}
 }
 
 matchmakingServer.on('sendClient', function(joinClientID){
@@ -21,5 +24,6 @@ matchmakingServer.on('sendClientID', function(newClientID){
 });
 
 function onStart(){
+	searching = false;
 	matchmakingServer.emit('foundMatch');
 }

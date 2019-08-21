@@ -10,6 +10,8 @@ var gameScale = 0.5;
 var menuElement = null;
 var gameWindow = null;
 var hostCodeElement = null;
+var menuBlurbElement = null;
+var menuBlurbText = '';
 
 window.onkeydown = function(e) { 
   return !(e.keyCode == 32 && e.target == document.body);
@@ -17,8 +19,11 @@ window.onkeydown = function(e) {
 
 document.addEventListener('DOMContentLoaded', function() {
 	document.addEventListener('updateHostCode', (e) => onUpdateHostCode(e));
+
 	document.addEventListener('start', startGame);
 	document.addEventListener('net-tick',(e) => gameNetTick(e));
+
+	document.addEventListener('lostConnection', () => onLostConnection());
 	document.addEventListener('reset',() => onReset());
 
 	showMenu();
@@ -36,9 +41,9 @@ function showMenu(){
 	hostCodeElement.id = 'hostCode';
 	menuElement.appendChild(hostCodeElement);
 
-	var hostCodeSeperator = document.createElement('P');
+	var hostCodeSeperator = document.createElement('BR');
 	menuElement.appendChild(hostCodeSeperator);
-
+	//---------------------------------------------------
 	var joinButton = document.createElement('BUTTON');
 	joinButton.innerHTML = 'Join';
 	joinButton.id = 'joinButton';
@@ -48,10 +53,32 @@ function showMenu(){
 	joinInput.id = 'joinInput';
 	menuElement.appendChild(joinInput);
 
+	var joinButtonSeperator = document.createElement('BR');
+	menuElement.appendChild(joinButtonSeperator);
+	//---------------------------------------------------
+	var searchButton = document.createElement('BUTTON');
+	searchButton.innerHTML = 'Find an opponent';
+	searchButton.id = 'searchButton';
+	menuElement.appendChild(searchButton);
+
+	var searchButtonSeperator = document.createElement('BR');
+	menuElement.appendChild(searchButtonSeperator);
+	//---------------------------------------------------
+	menuBlurbElement = document.createElement('SPAN');
+	menuBlurbElement.innerHTML = menuBlurbText;
+	menuBlurbElement.id = 'menuBlurb';
+	menuElement.appendChild(menuBlurbElement);
+	//---------------------------------------------------
+	searchButton.addEventListener('click', () => {
+		if(!searching){
+			requestSearch();
+			updateMenuBlurb('Searching for an opponent...');
+		}
+	})
+
 	joinButton.addEventListener('click', () => {
 		if(connection == null && localClient != null){
 			setConnection(localClient.connect(joinInput.value));
-			console.log('Connected to client');
 		}
 	});
 }
@@ -60,6 +87,7 @@ function startGame(){
 	if(menuElement != null){
 		document.body.removeChild(menuElement);
 		menuElement = null;
+		menuBlurb = null;
 	}
 
 	gameWorld = new GameWorld(1000, 700);
@@ -84,6 +112,7 @@ function startGame(){
 			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 	}
+	menuBlurbText = '';
 	gameWindow = gameCanvas.canvas;
 	hasStarted = true;
 
@@ -141,6 +170,21 @@ function drawTriangle(x, y, width, height, color, context){
 	context.lineTo(x - width, y - height);
 	context.fill();
 	context.fillStyle = 'black';
+}
+
+function updateMenuBlurb(newBlurb){
+	if(menuBlurbElement != null){
+		menuBlurbText = newBlurb;
+		menuBlurbElement.innerHTML = menuBlurbText;
+	}
+}
+
+function onLostConnection(){
+	menuBlurbText = 'Lost connection to opponent';
+	setTimeout(function() {
+		if(menuBlurbText == 'Lost connection to opponent')
+			updateMenuBlurb('');
+	}, 3000);
 }
 
 function onReset(){

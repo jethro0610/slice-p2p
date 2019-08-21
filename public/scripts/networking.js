@@ -21,7 +21,10 @@ var startTickEvent = new Event('start-tick');
 var tickEvent = new Event('net-tick');
 var endTickEvent = new Event('end-tick');
 var startEvent = new Event('start');
+
+var lostConnectionEvent = new Event('lostConnection');
 var resetEvent = new Event('reset');
+
 var updateHostCodeEvent = new Event('updateHostCode');
 
 var isHost = false;
@@ -116,6 +119,9 @@ function setConnection(newConnection){
 		});
 
 		connection.on('close', function(){
+			if(isTicking)
+				executeLostConnection();
+			
 			console.log('connection closed');
 			reset();
 		});
@@ -221,12 +227,18 @@ function netTick(){
 	}
 	
 	timeoutTimer += 1;
+	// Reset if the timeout timer exceeds the alotted time
 	if(timeoutTimer > maxTimeout){
-		// Reset if the timeout timer exceeds the alotted time
+		executeLostConnection();
 		reset();
 		return;
 	}
 	setTimeout(netTick, 1000/120);
+}
+
+function executeLostConnection(){
+	document.dispatchEvent(lostConnectionEvent);
+	reset();
 }
 
 function reset() {
