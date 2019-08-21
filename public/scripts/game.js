@@ -73,6 +73,12 @@ function showMenu(){
 		if(!searching){
 			requestSearch();
 			updateMenuBlurb('Searching for an opponent...');
+			searchButton.innerHTML = 'Stop searching';
+		}
+		else{
+			stopSearch();
+			updateMenuBlurbForMS('Stopped searching for opponent.', 3000);
+			searchButton.innerHTML = 'Find an opponent';
 		}
 	})
 
@@ -179,12 +185,19 @@ function updateMenuBlurb(newBlurb){
 	}
 }
 
-function onLostConnection(){
-	menuBlurbText = 'Lost connection to opponent';
+function updateMenuBlurbForMS(newBlurb, blurbTime){
+	if(menuBlurbElement != null){
+		menuBlurbText = newBlurb;
+		menuBlurbElement.innerHTML = menuBlurbText;
+	}
 	setTimeout(function() {
-		if(menuBlurbText == 'Lost connection to opponent')
+		if(menuBlurbText == newBlurb)
 			updateMenuBlurb('');
 	}, 3000);
+}
+
+function onLostConnection(){
+	updateMenuBlurbForMS('Lost connection to opponent', 3000);
 }
 
 function onReset(){

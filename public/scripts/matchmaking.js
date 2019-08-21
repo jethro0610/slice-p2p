@@ -12,6 +12,13 @@ function requestSearch(){
 	}
 }
 
+function stopSearch(){
+	if(searching){
+		searching = false;
+		matchmakingServer.emit('stopSearch');
+	}
+}
+
 matchmakingServer.on('sendClient', function(joinClientID){
 	if(connection == null){
 		setConnection(localClient.connect(joinClientID));

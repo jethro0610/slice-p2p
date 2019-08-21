@@ -26,6 +26,7 @@ class networkClient {
 
 	assignSocketFunctions(){
 		this.socket.on('requestSearch', () => this.onRequestSearch());
+		this.socket.on('stopSearch', () => this.onStopSearch());
 		this.socket.on('denyClient', () => this.onDenyClient());
 		this.socket.on('foundMatch', () => this.onFoundMatch());
 	}
@@ -35,6 +36,11 @@ class networkClient {
 			searchingClients.push(this);
 			this.sendClientTimer = setTimeout(() => this.sendClient(), 1000);
 		}
+	}
+
+	onStopSearch(){
+		if(searchingClients.includes(this))
+			searchingClients.splice(searchingClients.indexOf(this), 1);
 	}
 
 	sendClient(){
