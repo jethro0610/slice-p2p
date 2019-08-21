@@ -124,9 +124,11 @@ io.on('connection', function(socket){
 peerServer.on('disconnect', (client) =>{
 	// Remove from connected clients list
 	var disconnectingPeer = getClientFromID(client.toString(), connectedClients);
-	var generatedID = uniqid.time();
-	disconnectingPeer.id = generatedID;
-	disconnectingPeer.socket.emit('sendClientID', generatedID);
+	if(disconnectingPeer != null){
+		var generatedID = uniqid.time();
+		disconnectingPeer.id = generatedID;
+		disconnectingPeer.socket.emit('sendClientID', generatedID);
+	}
 });
 
 function getClientFromID(idToCheck, arrayToCheck){
