@@ -90,8 +90,8 @@ class networkClient {
 // Static files
 app.use(express.static('public'));
 
-// Listen on port 443
-server = http.listen(443, function (){
+// Listen on port 80
+server = http.listen(80, function (){
 	console.log('Listening');
 });
 
