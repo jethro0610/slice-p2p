@@ -78,8 +78,9 @@ class GameWorld {
 		for(var i = 0; i < this.players.length; i++){
 			this.players[i].draw();
 		}
-		//this.context.font = '32px Arial';
-		//this.context.fillText(player1.score.toString() + ' : ' + player2.score.toString(), 10 * gameScale, 50 * gameScale);
+
+		// Draw round UI
+		this.roundManager.draw();
 
 		setTimeout(() => this.draw(), 1000/120);
 	}
@@ -142,6 +143,7 @@ class RoundManager{
 		this.endRoundLength = 120;
 
 		this.disableInput = false;
+		this.scoreText = '0 : 0';
 	}
 
 	tick() {
@@ -156,6 +158,13 @@ class RoundManager{
 	playerHitDash(dashingPlayer, hitPlayer){
 		dashingPlayer.score += 1;
 		this.stateEndRound();
+
+		this.scoreText = '';
+		for (var i = 0; i < this.gameWorld.players.length; i++) {
+			this.scoreText += this.gameWorld.players[i].score.toString();
+			if(i != this.gameWorld.players.length - 1)
+				this.scoreText += ' : ';
+		}
 	}
 
 	introStateTick() {
@@ -192,6 +201,11 @@ class RoundManager{
 	stateEndRound(){
 		this.roundState = 'endRound';
 		this.disableInput = true;
+	}
+
+	draw(){
+		this.gameWorld.context.font = '32px Arial';
+		this.gameWorld.context.fillText(this.scoreText, 10 * gameScale, 50 * gameScale);
 	}
 }
 
