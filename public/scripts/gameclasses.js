@@ -74,13 +74,14 @@ class GameWorld {
 		  	this.context.fillStyle = 'black';
 		  	this.context.fillRect(this.rectangles[i].x * this.windowScale, this.rectangles[i].y * this.windowScale, this.rectangles[i].width * this.windowScale, this.rectangles[i].height * this.windowScale);
 		}
+
+		// Draw round UI
+		this.roundManager.draw();
+
 		// Draw all players
 		for(var i = 0; i < this.players.length; i++){
 			this.players[i].draw();
 		}
-
-		// Draw round UI
-		this.roundManager.draw();
 
 		setTimeout(() => this.draw(), 1000/120);
 	}
@@ -137,18 +138,29 @@ class Rectangle {
 class RoundManager{
 	constructor(newGameWorld){
 		this.gameWorld = newGameWorld;
-		this.roundState = 'intro';
+		this.roundState = 'startGameIntro';
+
+		this.startGameTimer = 0;
+		this.startGameLength = 300;
+
+		this.displayStartText = false;
 
 		this.endRoundTimer = 0;
 		this.endRoundLength = 120;
 
-		this.disableInput = false;
-		this.scoreText = '0 : 0';
+		this.disableInput = true;
+		this.scoreText = '0 - 0';
 	}
 
 	tick() {
-		if(this.roundState == 'intro'){
-			this.introStateTick();
+		if(this.roundState == 'startGameIntro'){
+			this.startGameIntroTick();
+		}
+		else if(this.roundState == 'startGameCount'){
+			this.startGameCountTick();
+		}
+		else if(this.roundState == 'intro'){
+			this.introTick();
 		}
 		else if(this.roundState == 'endRound'){
 			this.endRoundTick()
@@ -168,11 +180,32 @@ class RoundManager{
 		for (var i = 0; i < this.gameWorld.players.length; i++) {
 			this.scoreText += this.gameWorld.players[i].score.toString();
 			if(i != this.gameWorld.players.length - 1)
-				this.scoreText += ' : ';
+				this.scoreText += ' - ';
+		}
+	}
+	//----------------------------------------------------
+	startGameIntroTick() {
+		for (var i = 0; i < this.gameWorld.players.length; i++) {
+			if (!this.gameWorld.players[i].hitBottom)
+				return;
+		}
+		this.stateStartGameCount();
+	}
+
+	startGameCountTick(){
+		this.startGameTimer += 1;
+
+		if(this.startGameTimer >= this.startGameLength){
+			this.endRoundTimer = 0;
+			this.stateInRound();
+			this.displayStartText = true;
+			setTimeout(() => {
+				this.displayStartText = false;
+			}, 1000)
 		}
 	}
 
-	introStateTick() {
+	introTick() {
 		for (var i = 0; i < this.gameWorld.players.length; i++) {
 			if (!this.gameWorld.players[i].hitBottom)
 				return;
@@ -189,7 +222,10 @@ class RoundManager{
 			this.stateIntro();
 		}
 	}
-
+	//----------------------------------------------------
+	stateStartGameCount(){
+		this.roundState = 'startGameCount';
+	}
 	stateIntro(){
 		this.roundState = 'intro';
 		for (var i = 0; i < this.gameWorld.players.length; i++) {
@@ -207,18 +243,31 @@ class RoundManager{
 		this.roundState = 'endRound';
 		this.disableInput = true;
 	}
-
+	//----------------------------------------------------
 	draw(){
 		this.gameWorld.context.textBaseline = 'middle';
 	  	this.gameWorld.context.textAlign = "center";
 
-		if(this.roundState != 'endRound'){
-			this.gameWorld.context.font = '32px Arial';
-			this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, 50 * this.gameWorld.windowScale);
+	  	if(this.roundState != 'startGameIntro' && this.roundState != 'startGameCount'){
+			if(this.roundState != 'endRound'){
+				this.gameWorld.context.font = '32px Arial';
+				this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, 50 * this.gameWorld.windowScale);
+			}
+			else{
+				this.gameWorld.context.font = '64px Arial';
+				this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
+			}
 		}
 		else{
+			if(this.startGameTimer > this.startGameLength/4){
+		  		this.gameWorld.context.font = '64px Arial';
+				this.gameWorld.context.fillText('Ready...', (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
+	  		}
+		}
+
+		if(this.displayStartText){
 			this.gameWorld.context.font = '64px Arial';
-			this.gameWorld.context.fillText(this.scoreText, (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
+			this.gameWorld.context.fillText('Slice!', (this.gameWorld.width / 2) * this.gameWorld.windowScale, (this.gameWorld.height / 2) * this.gameWorld.windowScale);
 		}
 	}
 }

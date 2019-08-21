@@ -95,8 +95,8 @@ function startGame(){
 	}
 
 	gameWorld = new GameWorld(1000, 700, 0.5);
-	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0, 'right', 'red');
-	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0, 'left', 'blue');
+	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 50, 'right', 'red');
+	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 50, 'left', 'blue');
 
 	gameWorld.addRectangle(200, 16, (gameWorld.width/2) - 100, 500);
 	gameWorld.addRectangle(200, 16, gameWorld.width - 200, 400);
