@@ -41,8 +41,10 @@ class networkClient {
 	}
 
 	onStopSearch(){
-		if(searchingClients.includes(this))
+		if(searchingClients.includes(this)){
 			searchingClients.splice(searchingClients.indexOf(this), 1);
+			io.emit('sendSearchingPlayers', searchingClients.length);
+		}
 	}
 
 	sendClient(){
