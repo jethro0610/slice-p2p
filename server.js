@@ -9,6 +9,11 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 var searchingClients = [];
 var connectedClients = [];
 
+function logSearches(){
+	console.log(searchingClients.length);
+	setTimeout(() => logSearches(), 2000);
+}
+
 class networkClient {
 	constructor(newClientSocket, newClientID) {
 		this.socket = newClientSocket;
