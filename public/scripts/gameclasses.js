@@ -76,14 +76,7 @@ class GameWorld {
 		}
 		// Draw all players
 		for(var i = 0; i < this.players.length; i++){
-			var playerToDraw = this.players[i];
-			var spriteYOffset = 0;
-			if(playerToDraw.direction == 'left')
-				spriteYOffset = 17;
-		 	playerToDraw.drawTick();
-			this.context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, (playerToDraw.drawX  - 48)  * this.windowScale, (playerToDraw.drawY - 12) * this.windowScale, 32 * 4 * this.windowScale, 16 * 4 * this.windowScale);
-
-			this.drawTriangle((playerToDraw.drawX + 16) * this.windowScale, (playerToDraw.drawY - 20) * this.windowScale, 10, 10, playerToDraw.color, this.context);
+			this.players[i].draw();
 		}
 		//this.context.font = '32px Arial';
 		//this.context.fillText(player1.score.toString() + ' : ' + player2.score.toString(), 10 * gameScale, 50 * gameScale);
@@ -658,6 +651,23 @@ class Player {
 				this.spriteFrame = 4;
 			}
 		}
+	}
+
+	draw(){
+		this.drawTick();
+
+		var spriteYOffset = 0;
+		if(this.direction == 'left')
+			spriteYOffset = 17;
+		this.drawTick();
+		this.gameWorld.context.drawImage(this.spriteSheet, 
+			32 * this.spriteFrame, spriteYOffset, 32, 16, 
+			(this.drawX  - 48)  * this.gameWorld.windowScale, 
+			(this.drawY - 12) * this.gameWorld.windowScale, 
+			32 * 4 * this.gameWorld.windowScale, 
+			16 * 4 * this.gameWorld.windowScale);
+
+		this.gameWorld.drawTriangle((this.drawX + 16) * this.gameWorld.windowScale, (this.drawY - 20) * this.gameWorld.windowScale, 10, 10, this.color, this.gameWorld.context);
 	}
 
 	updateAnimState(){
