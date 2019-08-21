@@ -45,7 +45,7 @@ class networkClient {
 
 	sendClient(){
 		if(this.isSearching()){
-			var arrayWithoutClient = searchingClients;
+			var arrayWithoutClient = searchingClients.slice();
 			arrayWithoutClient.splice(arrayWithoutClient.indexOf(this), 1);
 			this.sendClientTimer = null;
 			if(arrayWithoutClient.length > 0){
