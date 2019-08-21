@@ -27,7 +27,7 @@ matchmakingServer.on('sendClient', function(joinClientID){
 
 matchmakingServer.on('sendClientID', function(newClientID){
 	console.log('recieved client id: ' + newClientID.toString());
-	setLocalClient(new Peer(newClientID, {host: 'localhost', port: 3000, path:'/api'}));
+	setLocalClient(new Peer(newClientID, {host: '/', path:'/api'}));
 });
 
 function onStart(){
