@@ -7,6 +7,7 @@ var gameScale = 0.5;
 
 var menuElement = null;
 var gameWindow = null;
+var searchingPlayersElement = null;
 var hostCodeElement = null;
 var menuBlurbElement = null;
 var menuBlurbText = '';
@@ -24,14 +25,31 @@ document.addEventListener('DOMContentLoaded', function() {
 	document.addEventListener('lostConnection', () => onLostConnection());
 	document.addEventListener('reset',() => onReset());
 
+	document.addEventListener('updateSearchingPlayers', (e) => updateSearchingPlayers(e.count));
+
 	showMenu();
 });
 
 function showMenu(){
 	menuElement = document.createElement('DIV');
-	menuElement.innerHTML = 'Your ID: ';
 	menuElement.id = 'menu';
 	document.body.appendChild(menuElement);
+	//---------------------------------------------------
+	var searchingPlayerMessage = document.createElement('SPAN');
+	searchingPlayerMessage.innerHTML = 'Current match searches: ';
+	searchingPlayerMessage.id = 'searchingPlayersMessage'
+	menuElement.appendChild(searchingPlayerMessage);
+
+	searchingPlayersElement = document.createElement('SPAN');
+	searchingPlayersElement.innerHTML = '0';
+	searchingPlayersElement.id = 'searchingPlayers'
+	menuElement.appendChild(searchingPlayersElement);
+
+	menuElement.appendChild(document.createElement('BR'));
+	//---------------------------------------------------
+	var hostCodeMessage = document.createElement('SPAN');
+	hostCodeMessage.innerHTML = 'Your ID: ';
+	menuElement.appendChild(hostCodeMessage);
 
 	hostCodeElement = document.createElement('SPAN');
 	if(localClient != null)
@@ -39,8 +57,7 @@ function showMenu(){
 	hostCodeElement.id = 'hostCode';
 	menuElement.appendChild(hostCodeElement);
 
-	var hostCodeSeperator = document.createElement('BR');
-	menuElement.appendChild(hostCodeSeperator);
+	menuElement.appendChild(document.createElement('BR'));
 	//---------------------------------------------------
 	var joinButton = document.createElement('BUTTON');
 	joinButton.innerHTML = 'Join';
@@ -51,16 +68,14 @@ function showMenu(){
 	joinInput.id = 'joinInput';
 	menuElement.appendChild(joinInput);
 
-	var joinButtonSeperator = document.createElement('BR');
-	menuElement.appendChild(joinButtonSeperator);
+	menuElement.appendChild(document.createElement('BR'));
 	//---------------------------------------------------
 	var searchButton = document.createElement('BUTTON');
 	searchButton.innerHTML = 'Find an opponent';
 	searchButton.id = 'searchButton';
 	menuElement.appendChild(searchButton);
 
-	var searchButtonSeperator = document.createElement('BR');
-	menuElement.appendChild(searchButtonSeperator);
+	menuElement.appendChild(document.createElement('BR'));
 	//---------------------------------------------------
 	menuBlurbElement = document.createElement('SPAN');
 	menuBlurbElement.innerHTML = menuBlurbText;
@@ -117,6 +132,10 @@ function gameNetTick(e){
 	}
 
 	gameWorld.tick();
+}
+
+function updateSearchingPlayers(numOfSerachingPlayers){
+	searchingPlayersElement.innerHTML = numOfSerachingPlayers.toString();
 }
 
 function updateMenuBlurb(newBlurb){

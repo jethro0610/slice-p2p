@@ -1,6 +1,8 @@
 var matchmakingServer = io();
 var searching = false;
 
+var searchingPlayersEvent = new Event('updateSearchingPlayers');
+
 document.addEventListener('DOMContentLoaded', function() {
 	document.addEventListener('start', () => onStart());
 });
@@ -33,6 +35,11 @@ matchmakingServer.on('sendClientID', function(newClientID){
 	else{
 		setLocalClient(new Peer(newClientID, {host: '/', path:'/api'}));
 	}
+});
+
+matchmakingServer.on('sendSearchingPlayers', function(numberOfSearchingPlayers){
+	searchingPlayersEvent.count = numberOfSearchingPlayers;
+	document.dispatchEvent(searchingPlayersEvent);
 });
 
 function onStart(){

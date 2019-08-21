@@ -35,6 +35,7 @@ class networkClient {
 	onRequestSearch(){
 		if(!searchingClients.includes(this)){
 			searchingClients.push(this);
+			io.emit('sendSearchingPlayers', searchingClients.length);
 			this.sendClientTimer = setTimeout(() => this.sendClient(), 1000);
 		}
 	}
@@ -76,6 +77,7 @@ class networkClient {
 	onFoundMatch(){
 		this.isPinging = false;
 		searchingClients.splice(searchingClients.indexOf(this), 1);
+		io.emit('sendSearchingPlayers', searchingClients.length);
 	}
 
 	onDisconnect(){
@@ -86,6 +88,7 @@ class networkClient {
 
 		if(this.isSearching()){
 			searchingClients.splice(searchingClients.indexOf(this), 1);
+			io.emit('sendSearchingPlayers', searchingClients.length);
 		}
 	}
 
@@ -119,6 +122,7 @@ io.on('connection', function(socket){
 		connectedClients.push(new networkClient(socket, generatedID));
 		socket.emit('sendClientID', generatedID);
 	}
+	socket.emit('sendSearchingPlayers', searchingClients.length);
 });
 
 peerServer.on('disconnect', (client) =>{
