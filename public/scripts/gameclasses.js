@@ -320,7 +320,7 @@ class Player {
 		// Apply friction
 		this.velX -= this.velX * frictionToUse;
 		// Move from input
-		if(this.inputToUse.left){
+		if(this.inputToUse.left && !this.inputToUse.right && this.canDash){
 			if(this.velX <= 0 || !this.hitBottom){
 				this.velX -= accelerationToUse;
 			}
@@ -330,7 +330,7 @@ class Player {
 			if(!this.dashing && this.canDash)
 				this.direction = 'left';
 		}
-		if(this.inputToUse.right && this.canDash){
+		if(this.inputToUse.right && !this.inputToUse.left && this.canDash){
 			if(this.velX >= 0 || !this.hitBottom){
 				this.velX += accelerationToUse;
 			}
@@ -581,7 +581,7 @@ class Player {
 			this.animState = 'endDash';
 
 		if(this.hitBottom){
-			if(this.inputToUse.right && this.velX != 0 || this.inputToUse.left && this.velX != 0){
+			if(this.inputToUse.right && this.velX != 0 && !this.inputToUse.left || this.inputToUse.left && this.velX != 0 && !this.inputToUse.right){
 				this.animState = 'run'
 			}
 			else if(!this.dashCooldown){
