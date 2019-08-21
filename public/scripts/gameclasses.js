@@ -28,6 +28,7 @@ class GameWorld {
 		this.height = height;
 		this.rectangles = [];
 		this.players = [];
+		this.roundManager = new RoundManager(this);
 		this.resetToNeutral = true;
 	}
 
@@ -44,6 +45,7 @@ class GameWorld {
 	}
 
 	tick(){
+		this.roundManager.tick();
 		for (var i = 0; i < this.players.length; i++) {
 			this.players[i].tick();
 		}
@@ -88,16 +90,73 @@ class Rectangle {
 	}
 }
 
+class RoundManager{
+	constructor(newGameWorld){
+		this.gameWorld = newGameWorld;
+		this.roundState = 'intro';
+
+		this.endRoundTimer = 0;
+		this.endRoundLength = 120;
+
+		this.disableInput = false;
+	}
+
+	tick() {
+		this.disableInput = false;
+		if(this.roundState == 'intro'){
+			this.disableInput = true;
+			this.introStateTick();
+		}
+		else if(this.roundState == 'endRound'){
+			this.disableInput = true;
+			this.endRoundTick()
+		}
+	}
+
+	introStateTick() {
+		for (var i = 0; i < this.gameWorld.players.length; i++) {
+			if (!this.gameWorld.players[i].hitBottom)
+				return;
+		}
+		this.stateInRound();
+	}
+
+	endRoundTick(){
+		if(this.gameWorld.resetToNeutral)
+			this.endRoundTimer += 1;
+
+		if(this.endRoundTimer >= this.endRoundLength){
+			this.endRoundTimer = 0;
+			this.stateIntro();
+		}
+	}
+
+	stateIntro(){
+		this.roundState = 'intro';
+		for (var i = 0; i < this.gameWorld.players.length; i++) {
+			this.gameWorld.players[i].resetNextTick = true;
+		}
+	}
+
+	stateInRound(){
+		this.roundState = 'inRound';
+	}
+
+	stateEndRound(){
+		this.roundState = 'endRound';
+	}
+}
+
 class Player {
 	constructor(x, y, spawnDirection, color, gameWorld) {
 		this.gameWorld = gameWorld;
+		this.roundManager = this.gameWorld.roundManager;
 		this.x = x;
 		this.y = y;
 		this.spawnX = x;
 		this.spawnY = y;
 		this.rectangle = new Rectangle(32, 52, this.x, this.y);
 		this.color = color;
-		this.firstHitBottom = false;
 
 		this.hitRight= false;
 		this.hitLeft = false;
@@ -157,11 +216,8 @@ class Player {
 		this.canDoubleJump = true;
 		this.canJump = true;
 
+		this.resetNextTick = false;
 		this.score = 0;
-
-		this.endRound = false;
-		this.endRoundTimer = 0;
-		this.endRoundLength = 120;
 	}
 
 	setFriction(newFriction){
@@ -223,9 +279,9 @@ class Player {
 		}
 
 		// Detect collision with walls
-		if(this.rectangle.right() >= gameWorld.width){
+		if(this.rectangle.right() >= this.gameWorld.width){
 			this.hitRight = true;
-			this.x = gameWorld.width - this.rectangle.width;
+			this.x = this.gameWorld.width - this.rectangle.width;
 			this.velX = 0;
 		}
 		if(this.rectangle.left() <= 0){
@@ -237,10 +293,10 @@ class Player {
 			this.hitTop = true;
 			this.y = 0;
 		}
-		if(this.rectangle.bottom() >= gameWorld.height){
+		if(this.rectangle.bottom() >= this.gameWorld.height){
 			if(this.velY >= 0){
 				this.hitBottom = true;
-				this.y = gameWorld.height - this.rectangle.height;
+				this.y = this.gameWorld.height - this.rectangle.height;
 				this.velY = 0;
 			}
 		}
@@ -254,7 +310,7 @@ class Player {
 		this.updateCollision();
 
 		// Input
-		if(!this.slowMo && !this.endRound && this.firstHitBottom){
+		if(!this.slowMo && !this.roundManager.disableInput){
 			this.inputToUse = this.playerInput;
 		}
 		else{
@@ -303,7 +359,6 @@ class Player {
 		var frictionToUse;
 		var accelerationToUse;
 		if(this.hitBottom){
-			this.firstHitBottom = true;
 			this.canDoubleJump = true;
 			this.canJump = true;
 			frictionToUse = this.groundFriction * this.timeDialation;
@@ -355,11 +410,11 @@ class Player {
 			this.dashTimer = 0;
 			this.velX = this.velX * 0.01;
 			this.velY = this.velY * 0.1;
-			if(!this.endRound && !this.hitDash){
+			if(this.roundManager.roundState != 'endRound' && !this.hitDash){
 				this.dashCooldown = this.dashCooldownLength;
 			}
-			else if(this.endRound){
-				this.dashCooldown = this.endRoundLength;
+			else if(this.roundManager.roundState == 'endRound'){
+				this.dashCooldown = this.roundManager.endRoundLength;
 			}
 			else{
 				this.dashCooldown = this.dashCooldownLength / 4;
@@ -383,7 +438,7 @@ class Player {
 			}
 		}
 
-		if(this.hitBottom && !this.endRound){
+		if(this.hitBottom && this.roundManager.roundState != 'endRound'){
 			this.canDash = true;
 			this.dashing = false;
 			this.dashTimer = 0;
@@ -461,9 +516,8 @@ class Player {
 						this.score += 1;
 
 						var knockbackMult = 1;
-						if(gameWorld.resetToNeutral){
-							this.endRound = true;
-							playerToCheck.endRound = true;
+						if(this.gameWorld.resetToNeutral){
+							this.roundManager.stateEndRound();
 							knockbackMult = 2;
 						}
 
@@ -484,22 +538,18 @@ class Player {
 			}
 		}
 
-		// End round resetting
-		if(this.endRound){
-			if(this.gameWorld.resetToNeutral)
-				this.endRoundTimer += 1 * this.timeDialation;
-		}
-		if(this.endRoundTimer >= this.endRoundLength){
-			this.endRoundTimer = 0;
-			this.reset();
-		}
-
 		// Set speed for slow mo
 		if(this.slowMo){
 			this.timeDialation = this.slowMoSpeed;
 		}
 		else{
 			this.timeDialation = this.normalSpeed;
+		}
+
+		// Reset to neutral
+		if(this.resetNextTick){
+			this.resetNextTick = false;
+			this.reset();
 		}
 
 		// Apply velocity to position
@@ -512,7 +562,7 @@ class Player {
 		
 		// Update draw position
 		this.drawX = this.x;
-		this.drawY = this.y
+		this.drawY = this.y;
 	}
 
 	drawTick(){
@@ -600,7 +650,6 @@ class Player {
 		this.velX = 0;
 		this.velY = 0;
 		this.direction = this.spawnDirection;
-		this.firstHitBottom = false;
 
 		this.drawX = this.x;
 		this.drawY = this.y;
@@ -618,7 +667,5 @@ class Player {
 		this.hitCooldown = 0;
 
 		this.slowMo = false;
-
-		this.endRound = false;
 	}
 }

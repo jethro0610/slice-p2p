@@ -197,7 +197,7 @@ function updateMenuBlurbForMS(newBlurb, blurbTime){
 }
 
 function onLostConnection(){
-	updateMenuBlurbForMS('Lost connection to opponent', 3000);
+	updateMenuBlurbForMS('Lost connection to opponent.', 3000);
 }
 
 function onReset(){
