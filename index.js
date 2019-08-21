@@ -45,16 +45,22 @@ class networkClient {
 
 	sendClient(){
 		if(this.isSearching()){
-			for (var i = 0; i < searchingClients.length; i++) {
-				if (searchingClients[i] != this && !searchingClients[i].isPinging){
-					this.socket.emit('sendClient', searchingClients[i].id);
-					this.isPinging = true;
-					break;
+			var arrayWithoutClient = searchingClients;
+			arrayWithoutClient.splice(arrayWithoutClient.indexOf(this), 1);
+			this.sendClientTimer = null;
+			if(arrayWithoutClient.length > 0){
+				while (true){
+					var sendClientIndex = getRandomInt(0, arrayWithoutClient.length - 1);
+					if (arrayWithoutClient[sendClientIndex] != this && !arrayWithoutClient[sendClientIndex].isPinging){
+						this.socket.emit('sendClient', arrayWithoutClient[sendClientIndex].id);
+						this.isPinging = true;
+						break;
+					}
 				}
 			}
-			this.sendClientTimer = null;
-			if(searchingClients.length <= 1)
+			else {
 				this.sendClientTimer = setTimeout(() => this.sendClient(), 1000);
+			}
 		}
 	}
 
@@ -131,4 +137,8 @@ function getClientFromSocket(socketToCheck, arrayToCheck){
 			return arrayToCheck[i];
 	}
 	return null;
+}
+
+function getRandomInt (min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
