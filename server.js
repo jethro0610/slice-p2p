@@ -29,6 +29,7 @@ class networkClient {
 		this.socket.on('stopSearch', () => this.onStopSearch());
 		this.socket.on('denyClient', () => this.onDenyClient());
 		this.socket.on('foundMatch', () => this.onFoundMatch());
+		this.socket.on('disconnect', () => this.onDisconnect());
 	}
 
 	onRequestSearch(){
@@ -77,6 +78,17 @@ class networkClient {
 		searchingClients.splice(searchingClients.indexOf(this), 1);
 	}
 
+	onDisconnect(){
+		// Remove from connected clients list
+		if(connectedClients.includes(this)){
+			connectedClients.splice(connectedClients.indexOf(this), 1);
+		}
+
+		if(this.isSearching()){
+			searchingClients.splice(searchingClients.indexOf(this), 1);
+		}
+	}
+
 	isSearching(){
 		if(searchingClients.includes(this)){
 			return true;
@@ -112,15 +124,9 @@ io.on('connection', function(socket){
 peerServer.on('disconnect', (client) =>{
 	// Remove from connected clients list
 	var disconnectingPeer = getClientFromID(client.toString(), connectedClients);
-	if(disconnectingPeer != null){
-		connectedClients.splice(connectedClients.indexOf(disconnectingPeer), 1);
-	}
-
-	// Remove from searching clients list
-	var disconnectingSearch = getClientFromID(client.toString(), searchingClients);
-	if(disconnectingSearch != null){
-		searchingClients.splice(searchingClients.indexOf(disconnectingSearch), 1);
-	}
+	var generatedID = uniqid.time();
+	disconnectingPeer.id = generatedID;
+	disconnectingPeer.socket.emit('sendClientID', generatedID);
 });
 
 function getClientFromID(idToCheck, arrayToCheck){
