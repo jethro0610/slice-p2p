@@ -219,12 +219,6 @@ class Player {
 					this.hitBottom = true;
 					this.y = rectangleToCheck.top() - this.rectangle.height;
 				}
-
-				if(this.rectangle.top() <= rectangleToCheck.bottom() && this.rectangle.bottom() >= rectangleToCheck.bottom()){
-					//this.hitTop = true;
-					//this.y = rectangleToCheck.bottom();
-					//this.velY = 0;
-				}
 			}
 		}
 
@@ -242,7 +236,6 @@ class Player {
 		if(this.rectangle.top() <= 0){
 			this.hitTop = true;
 			this.y = 0;
-			//this.velY = 0;
 		}
 		if(this.rectangle.bottom() >= gameWorld.height){
 			if(this.velY >= 0){
@@ -523,9 +516,11 @@ class Player {
 	}
 
 	drawTick(){
+		// Extrapolate draw position based on velocity
 		this.drawX = lerp(this.drawX, this.drawX + this.velX * this.timeDialation, this.extrapolationStrength);
 		this.drawY = lerp(this.drawY, this.drawY + this.velY * this.timeDialation, this.extrapolationStrength);
 
+		// Keep draw position within window
 		if(this.drawX < 0)
 			this.drawX = 0;
 		if(this.drawX + this.rectangle.width > this.gameWorld.width)

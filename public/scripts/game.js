@@ -123,8 +123,6 @@ function draw(){
 		if(playerToDraw.direction == 'left')
 			spriteYOffset = 17;
 	 	playerToDraw.drawTick();
-	 	//context.fillStyle = 'red';
-		//context.fillRect(gameWorld.players[i].drawX * gameScale, gameWorld.players[i].drawY * gameScale, gameWorld.players[i].rectangle.width * gameScale, gameWorld.players[i].rectangle.height * gameScale);
 		context.drawImage(playerToDraw.spriteSheet, 32 * playerToDraw.spriteFrame, spriteYOffset, 32, 16, (playerToDraw.drawX  - 48)  * gameScale, (playerToDraw.drawY - 12) * gameScale, 32 * 4 * gameScale, 16 * 4 * gameScale);
 
 		drawTriangle((playerToDraw.drawX + 16) * gameScale, (playerToDraw.drawY - 20) * gameScale, 10, 10, playerToDraw.color, context);

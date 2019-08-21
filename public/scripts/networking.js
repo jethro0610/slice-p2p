@@ -24,7 +24,6 @@ var startEvent = new Event('start');
 var resetEvent = new Event('reset');
 var updateHostCodeEvent = new Event('updateHostCode');
 
-
 var isHost = false;
 
 var timeoutTimer;
@@ -122,7 +121,9 @@ function setConnection(newConnection){
 		});
 
 		connection.on('data', function(data){
+			// Reset the timeout timer when recieving data
 			timeoutTimer = 0;
+
 			onRecieveMessage(data);
 		});
 	}
@@ -221,6 +222,7 @@ function netTick(){
 	
 	timeoutTimer += 1;
 	if(timeoutTimer > maxTimeout){
+		// Reset if the timeout timer exceeds the alotted time
 		reset();
 		return;
 	}

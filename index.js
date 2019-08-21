@@ -106,11 +106,13 @@ io.on('connection', function(socket){
 });
 
 peerServer.on('disconnect', (client) =>{
+	// Remove from connected clients list
 	var disconnectingPeer = getClientFromID(client.toString(), connectedClients);
 	if(disconnectingPeer != null){
 		connectedClients.splice(connectedClients.indexOf(disconnectingPeer), 1);
 	}
 
+	// Remove from searching clients list
 	var disconnectingSearch = getClientFromID(client.toString(), searchingClients);
 	if(disconnectingSearch != null){
 		searchingClients.splice(searchingClients.indexOf(disconnectingSearch), 1);
