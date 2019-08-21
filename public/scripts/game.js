@@ -62,13 +62,13 @@ function startGame(){
 		menuElement = null;
 	}
 
-	gameWorld = new GameWorld(1000, 500);
+	gameWorld = new GameWorld(1000, 700);
 	player1 = gameWorld.addPlayer((gameWorld.width / 8) - 32, 0, 'right', 'red');
 	player2 = gameWorld.addPlayer(gameWorld.width - (gameWorld.width / 8), 0, 'left', 'blue');
 
-	gameWorld.addRectangle(200, 16, (gameWorld.width/2) - 100, 400);
-	gameWorld.addRectangle(200, 16, gameWorld.width - 200, 300);
-	gameWorld.addRectangle(200, 16, 0, 300);
+	gameWorld.addRectangle(200, 16, (gameWorld.width/2) - 100, 500);
+	gameWorld.addRectangle(200, 16, gameWorld.width - 200, 400);
+	gameWorld.addRectangle(200, 16, 0, 400);
 
 	gameCanvas = {
 		canvas : document.createElement('canvas'),

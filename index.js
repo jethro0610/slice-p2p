@@ -61,7 +61,6 @@ class networkClient {
 	}
 
 	onFoundMatch(){
-		console.log('found match');
 		this.isPinging = false;
 		searchingClients.splice(searchingClients.indexOf(this), 1);
 	}
@@ -84,19 +83,12 @@ server = http.listen(3000, function (){
 	console.log('Listening');
 });
 
-var options = {
-	debug: true
-}
-
 // Initialize ExpressPeerServer
-var peerServer = ExpressPeerServer(server, options);
+var peerServer = ExpressPeerServer(server);
 app.use('/api', peerServer);
 
 // On client connection to SocketIO server
 io.on('connection', function(socket){
-	console.log('a client connected to socketIO');
-	
-	console.log('client id requested');
 	// Only assign an ID if the client doesn't have one
 	if(getClientFromSocket(socket, connectedClients) == null){
 		var generatedID = uniqid.time();
