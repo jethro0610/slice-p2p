@@ -3,7 +3,8 @@ var uniqid = require('uniqid');
 
 var app = express();
 var http = require('http').createServer(app);
-var io = require('socket.io')(http);
+const { Server } = require("socket.io");
+const io = new Server(http);
 var ExpressPeerServer = require('peer').ExpressPeerServer;
 
 var searchingClients = [];

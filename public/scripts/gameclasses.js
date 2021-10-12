@@ -145,7 +145,7 @@ class RoundManager{
 		this.roundState = 'startGameIntro';
 
 		this.startGameTimer = 0;
-		this.startGameLength = 300;
+		this.startGameLength = 150;
 		this.displayStartText = false;
 
 		this.endRoundTimer = 0;
@@ -334,15 +334,15 @@ class Player {
 		this.hitTop = false;
 		this.hitBottom = false;
 
-		this.maxMoveSpeed = 10;
-		this.groundFriction = 0.1;
+		this.maxMoveSpeed = 15;
+		this.groundFriction = 0.25;
 		this.airFriction = 0.05;
 
 		this.pivotSpeed = 1.0;
 
-		this.gravitySpeed = 1;
-		this.maxGravity = 15;
-		this.jumpStrength = 20;
+		this.gravitySpeed = 2;
+		this.maxGravity = 30;
+		this.jumpStrength = 30;
 
 		this.velX = 0;
 		this.velY = 0;
@@ -355,10 +355,10 @@ class Player {
 		this.inputUpLastFrame = false;
 		this.inputDashLastFrame = false;
 
-		this.dashSpeed = 30;
-		this.dashLength = 7;
+		this.dashSpeed = 60;
+		this.dashLength = 5;
 		this.dashCooldown = 0;
-		this.dashCooldownLength = 40;
+		this.dashCooldownLength = 30;
 		this.dashTimer = 0;
 		this.canDash = true;
 		this.dashing = false;
